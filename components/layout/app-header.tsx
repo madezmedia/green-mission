@@ -15,7 +15,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { UserButton, useUser } from "@clerk/nextjs"
 import AppSidebar from "./app-sidebar"
 import { useState } from "react"
-import ThemeSwitcher from "./theme-switcher"
 
 export default function AppHeader() {
   const { user } = useUser()
@@ -54,8 +53,6 @@ export default function AppHeader() {
             />
           </div>
         </form>
-
-        <ThemeSwitcher />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

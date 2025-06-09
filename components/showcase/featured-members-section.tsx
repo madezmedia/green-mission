@@ -79,7 +79,7 @@ export default function FeaturedMembersSection() {
         </div>
         <div className="mt-12 text-center">
           <Button variant="secondary" size="lg" asChild>
-            <Link href="/dashboard">View All Members</Link>
+            <Link href="/directory">Explore Business Directory</Link>
           </Button>
         </div>
       </div>

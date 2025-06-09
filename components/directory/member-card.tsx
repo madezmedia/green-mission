@@ -1,10 +1,11 @@
 import Image from "next/image"
+import Link from "next/link"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Star, MapPin, Shield, ArrowRight, ExternalLink, Heart } from "lucide-react"
+import { Star, MapPin, Shield, ExternalLink, Heart, Eye } from "lucide-react"
 import type { Member } from "@/types"
 import { cn } from "@/lib/utils"
 
@@ -13,12 +14,24 @@ interface MemberCardProps {
   layout?: "grid" | "list"
 }
 
+// Helper function to create URL-friendly slug
+function createSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim()
+}
+
 export default function MemberCard({ member, layout = "grid" }: MemberCardProps) {
   const tierColors = {
     Enterprise: "bg-primary text-primary-foreground",
     Premium: "bg-secondary text-secondary-foreground",
     Basic: "bg-accent text-accent-foreground",
   }
+
+  const memberSlug = createSlug(member.name)
 
   if (layout === "list") {
     return (
@@ -45,9 +58,12 @@ export default function MemberCard({ member, layout = "grid" }: MemberCardProps)
             </div>
           </div>
           <div className="ml-4 flex flex-col items-end gap-2">
-            <Button className="shadow-sm">
-              Connect <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <Link href={`/directory/${memberSlug}`}>
+              <Button className="shadow-sm">
+                <Eye className="mr-2 h-4 w-4" />
+                View Profile
+              </Button>
+            </Link>
             <Button variant="outline" size="icon">
               <ExternalLink className="h-4 w-4" />
             </Button>
@@ -119,9 +135,12 @@ export default function MemberCard({ member, layout = "grid" }: MemberCardProps)
         </div>
       </CardContent>
       <CardFooter className="gap-2 bg-muted/30">
-        <Button className="w-full shadow-sm">
-          Connect <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+        <Link href={`/directory/${memberSlug}`} className="flex-1">
+          <Button className="w-full shadow-sm">
+            <Eye className="mr-2 h-4 w-4" />
+            View Profile
+          </Button>
+        </Link>
         <Button variant="outline" size="icon">
           <ExternalLink className="h-4 w-4" />
         </Button>

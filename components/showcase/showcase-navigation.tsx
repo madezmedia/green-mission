@@ -9,7 +9,7 @@ import ShowcaseThemeSwitcher from "./showcase-theme-switcher"
 
 const navItems = [
   { name: "Home", href: "#hero" },
-  { name: "Features", href: "#features" },
+  { name: "Directory", href: "/directory" },
   { name: "Pricing", href: "#pricing" },
   { name: "About", href: "#about" },
 ]

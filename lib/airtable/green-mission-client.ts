@@ -180,7 +180,7 @@ function getGreenMissionAirtableBase(baseType: GreenMissionBaseType): AirtableBa
 
   if (!config.configured) {
     throw new Error(
-      `Green Mission Airtable ${baseType} base is not configured. Please set AIRTABLE_${baseType.toUpperCase()}_BASE_ID and relevant API_KEY environment variables.`,
+      `Green Mission Airtable ${baseType} base is not configured. Please set AIRTABLE_${baseType === 'directory' ? 'DIR' : baseType.toUpperCase()}_BASE_ID and relevant API_KEY environment variables.`,
     )
   }
 
@@ -372,16 +372,16 @@ export async function getGreenMissionMemberBusinesses(
     let filterFormula = ""
     const conditions: string[] = []
 
-    if (options.directoryVisibility !== false) {
-      // Default to true
-      conditions.push('{"Directory Visibility"} = TRUE()')
+    // Only filter by Directory Visibility if explicitly set to false
+    if (options.directoryVisibility === false) {
+      conditions.push('{"Directory Visibility"} = FALSE()')
     }
+    // If not specified, show all regardless of Directory Visibility
 
     if (options.membershipStatus) {
       conditions.push(`{Membership Status} = '${options.membershipStatus}'`)
-    } else {
-      conditions.push("{Membership Status} = 'Active'") // Default to active
     }
+    // If not specified, show all membership statuses (Active, Pending, etc.)
 
     if (options.featuredMember) {
       conditions.push('{"Featured Member"} = TRUE()')
@@ -412,16 +412,20 @@ export async function getGreenMissionMemberBusinesses(
       filterFormula = conditions.length === 1 ? conditions[0] : `AND(${conditions.join(", ")})`
     }
 
-    const records = await table
-      .select({
-        filterByFormula: filterFormula || undefined, // Pass undefined if no filters
-        sort: [
-          { field: "Featured Member", direction: "desc" },
-          { field: "Business Name", direction: "asc" },
-        ],
-        maxRecords: options.limit || 100,
-      })
-      .all()
+    const selectOptions: any = {
+      sort: [
+        { field: "Featured Member", direction: "desc" },
+        { field: "Business Name", direction: "asc" },
+      ],
+      maxRecords: options.limit || 100,
+    }
+
+    // Only add filterByFormula if we have conditions
+    if (filterFormula) {
+      selectOptions.filterByFormula = filterFormula
+    }
+
+    const records = await table.select(selectOptions).all()
 
     return records.map((record: Record<Partial<MemberBusiness>>) => ({
       id: record.id,
@@ -769,3 +773,59 @@ export async function updateGreenMissionMemberBusiness(id: string, updates: Part
     return false
   }
 }
+
+// Simplified client class for business listing management
+export class GreenMissionClient {
+  // Get members with filtering options
+  async getMembers(options: { filterByFormula?: string } = {}) {
+    return await getGreenMissionMemberBusinesses({
+      limit: 1000,
+      ...options
+    })
+  }
+
+  // Create a new member business
+  async createMember(memberData: any) {
+    try {
+      const base = getGreenMissionAirtableBase("directory")
+      const table = base("Member Businesses")
+      
+      const records = await table.create([{ fields: memberData }])
+      return records[0]
+    } catch (error) {
+      console.error("Error creating member:", error)
+      throw error
+    }
+  }
+
+  // Update existing member business
+  async updateMember(recordId: string, updates: any) {
+    try {
+      const base = getGreenMissionAirtableBase("directory")
+      const table = base("Member Businesses")
+      
+      const records = await table.update([{ id: recordId, fields: updates }])
+      return records[0]
+    } catch (error) {
+      console.error("Error updating member:", error)
+      throw error
+    }
+  }
+
+  // Delete member business
+  async deleteMember(recordId: string) {
+    try {
+      const base = getGreenMissionAirtableBase("directory")
+      const table = base("Member Businesses")
+      
+      await table.destroy([recordId])
+      return true
+    } catch (error) {
+      console.error("Error deleting member:", error)
+      throw error
+    }
+  }
+}
+
+// Export singleton instance
+export const greenMissionClient = new GreenMissionClient()

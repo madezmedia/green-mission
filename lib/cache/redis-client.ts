@@ -11,11 +11,11 @@ function convertRedisUrl(url: string): string {
 
   // Convert rediss:// to https://
   if (url.startsWith("rediss://")) {
-    // Extract the host and credentials from rediss URL
-    const match = url.match(/rediss:\/\/([^@]+)@([^:]+):(\d+)/)
+    // Extract the host from rediss URL (without credentials)
+    const match = url.match(/rediss:\/\/[^@]*@([^:]+):(\d+)/)
     if (match) {
-      const [, credentials, host] = match
-      return `https://${credentials}@${host}`
+      const [, host] = match
+      return `https://${host}`
     }
   }
 
@@ -24,7 +24,7 @@ function convertRedisUrl(url: string): string {
 
 // Check if Redis is configured and available
 function isRedisConfigured(): boolean {
-  return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)
 }
 
 // Create Redis client only if configured
@@ -32,16 +32,16 @@ let redis: Redis | null = null
 
 if (isRedisConfigured()) {
   try {
-    const restUrl = convertRedisUrl(process.env.UPSTASH_REDIS_REST_URL!)
-
     redis = new Redis({
-      url: restUrl,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+      url: process.env.KV_REST_API_URL!,
+      token: process.env.KV_REST_API_TOKEN!,
     })
   } catch (error) {
     console.warn("Redis configuration failed, running without cache:", error)
     redis = null
   }
+} else {
+  console.log("Redis not configured, running in memory cache mode")
 }
 
 // Cache key patterns for different services

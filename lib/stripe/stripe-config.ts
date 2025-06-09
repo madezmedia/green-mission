@@ -107,7 +107,7 @@ export class StripeHelpers {
       after_completion: {
         type: "redirect",
         redirect: {
-          url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
+          url: `${process.env.NEXT_PUBLIC_APP_URL}/success`,
         },
       },
     })

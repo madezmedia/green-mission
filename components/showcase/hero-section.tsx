@@ -57,7 +57,7 @@ export default function HeroSection() {
               className="bg-white text-primary hover:bg-white/90 shadow-xl hover:shadow-2xl transition-all hover:scale-105 px-8 py-6 text-lg font-semibold group"
               asChild
             >
-              <Link href="/dashboard">
+              <Link href="/directory">
                 Explore Directory
                 <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>

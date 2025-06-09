@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import { Leaf, MapPin, Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,8 +16,14 @@ export default function ShowcaseMemberCard({ member }: ShowcaseMemberCardProps) 
     Premium: "bg-secondary text-secondary-foreground",
     Basic: "bg-accent text-accent-foreground",
   }
+
+  // Create slug from member name
+  const createSlug = (name: string) => 
+    name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
+
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-xl">
+    <Link href={`/directory/${createSlug(member.name)}`}>
+      <Card className="overflow-hidden transition-all hover:shadow-xl hover:scale-105 cursor-pointer">
       <CardHeader className="flex flex-row items-start gap-4 space-y-0 p-6">
         <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-lg bg-muted">
           <Image
@@ -57,5 +64,6 @@ export default function ShowcaseMemberCard({ member }: ShowcaseMemberCardProps) 
         <div className="mt-4 rounded-md bg-muted p-3 text-xs font-medium text-primary">{member.category}</div>
       </CardContent>
     </Card>
+    </Link>
   )
 }

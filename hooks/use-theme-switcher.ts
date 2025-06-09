@@ -14,58 +14,74 @@ export function useThemeSwitcher() {
   const [colorTheme, setColorThemeState] = useState<ColorTheme>("mint")
   const [mounted, setMounted] = useState(false)
 
-  // Load saved preferences on mount
+  // Load saved preferences on mount only
   useEffect(() => {
     setMounted(true)
 
-    // Load color theme from localStorage
-    const savedColorTheme = localStorage.getItem(COLOR_THEME_KEY) as ColorTheme
-    if (savedColorTheme && ["mint", "playful"].includes(savedColorTheme)) {
-      setColorThemeState(savedColorTheme)
-    }
+    // Only access localStorage on client side
+    if (typeof window !== "undefined") {
+      try {
+        // Load color theme from localStorage
+        const savedColorTheme = localStorage.getItem(COLOR_THEME_KEY) as ColorTheme
+        if (savedColorTheme && ["mint", "playful"].includes(savedColorTheme)) {
+          setColorThemeState(savedColorTheme)
+        }
 
-    // Load appearance theme from localStorage if not already set by next-themes
-    const savedAppearanceTheme = localStorage.getItem(THEME_PREFERENCE_KEY) as AppearanceTheme
-    if (savedAppearanceTheme && ["light", "dark", "system"].includes(savedAppearanceTheme)) {
-      // Only set if it's different from current theme to avoid unnecessary updates
-      if (savedAppearanceTheme !== theme) {
-        setTheme(savedAppearanceTheme)
+        // Load appearance theme from localStorage if not already set by next-themes
+        const savedAppearanceTheme = localStorage.getItem(THEME_PREFERENCE_KEY) as AppearanceTheme
+        if (savedAppearanceTheme && ["light", "dark", "system"].includes(savedAppearanceTheme)) {
+          // Only set if it's different from current theme to avoid unnecessary updates
+          if (savedAppearanceTheme !== theme) {
+            setTheme(savedAppearanceTheme)
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to load theme preferences:", error)
       }
     }
-  }, [theme, setTheme])
+  }, []) // Remove dependencies to prevent infinite loop
+
 
   // Apply color theme changes
   useEffect(() => {
-    if (!mounted) return
+    if (!mounted || typeof window === "undefined") return
 
-    const root = document.documentElement
+    try {
+      const root = document.documentElement
 
-    // Add transition class for smooth theme changes
-    root.classList.add("theme-transition")
+      // Add transition class for smooth theme changes
+      root.classList.add("theme-transition")
 
-    // Remove existing theme classes
-    root.classList.remove("theme-playful")
+      // Remove existing theme classes
+      root.classList.remove("theme-playful")
 
-    // Apply color theme
-    if (colorTheme === "playful") {
-      root.classList.add("theme-playful")
+      // Apply color theme
+      if (colorTheme === "playful") {
+        root.classList.add("theme-playful")
+      }
+
+      // Save color theme to localStorage
+      localStorage.setItem(COLOR_THEME_KEY, colorTheme)
+
+      // Remove transition class after animation
+      const timeoutId = setTimeout(() => {
+        root.classList.remove("theme-transition")
+      }, 500)
+
+      return () => clearTimeout(timeoutId)
+    } catch (error) {
+      console.warn("Failed to apply theme changes:", error)
     }
-
-    // Save color theme to localStorage
-    localStorage.setItem(COLOR_THEME_KEY, colorTheme)
-
-    // Remove transition class after animation
-    const timeoutId = setTimeout(() => {
-      root.classList.remove("theme-transition")
-    }, 500)
-
-    return () => clearTimeout(timeoutId)
   }, [colorTheme, mounted])
 
   // Save appearance theme changes
   useEffect(() => {
-    if (!mounted || !theme) return
-    localStorage.setItem(THEME_PREFERENCE_KEY, theme)
+    if (!mounted || !theme || typeof window === "undefined") return
+    try {
+      localStorage.setItem(THEME_PREFERENCE_KEY, theme)
+    } catch (error) {
+      console.warn("Failed to save theme preference:", error)
+    }
   }, [theme, mounted])
 
   const setColorTheme = useCallback((newColorTheme: ColorTheme) => {
@@ -103,10 +119,16 @@ export function useThemeSwitcher() {
 
   // Clear all theme preferences (useful for reset functionality)
   const clearThemePreferences = useCallback(() => {
-    localStorage.removeItem(COLOR_THEME_KEY)
-    localStorage.removeItem(THEME_PREFERENCE_KEY)
-    setColorThemeState("mint")
-    setTheme("system")
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(COLOR_THEME_KEY)
+        localStorage.removeItem(THEME_PREFERENCE_KEY)
+        setColorThemeState("mint")
+        setTheme("system")
+      } catch (error) {
+        console.warn("Failed to clear theme preferences:", error)
+      }
+    }
   }, [setTheme])
 
   // Get current theme state for debugging or analytics

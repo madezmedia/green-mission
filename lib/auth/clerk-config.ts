@@ -4,15 +4,15 @@ export const clerkConfig: Partial<ClerkProviderProps> = {
   appearance: {
     baseTheme: undefined, // Will be set dynamically based on theme
     variables: {
-      colorPrimary: "hsl(174, 55%, 40%)", // Green Mission primary color
-      colorBackground: "hsl(var(--background))",
-      colorInputBackground: "hsl(var(--input))",
-      colorInputText: "hsl(var(--foreground))",
-      colorText: "hsl(var(--foreground))",
-      colorTextSecondary: "hsl(var(--muted-foreground))",
-      colorDanger: "hsl(var(--destructive))",
-      colorSuccess: "hsl(var(--color-gm-success))",
-      colorWarning: "hsl(var(--color-gm-warning))",
+      colorPrimary: "hsl(174, 55%, 40%)",
+      colorBackground: "hsl(0, 0%, 100%)",
+      colorInputBackground: "hsl(165, 15%, 96%)",
+      colorInputText: "hsl(195, 35%, 15%)",
+      colorText: "hsl(195, 35%, 15%)",
+      colorTextSecondary: "hsl(195, 25%, 45%)",
+      colorDanger: "hsl(0, 84.2%, 60.2%)",
+      colorSuccess: "hsl(158, 70%, 40%)",
+      colorWarning: "hsl(45, 90%, 50%)",
       borderRadius: "0.75rem",
       fontFamily: "Inter, sans-serif",
     },
@@ -24,29 +24,29 @@ export const clerkConfig: Partial<ClerkProviderProps> = {
         },
       },
       card: {
-        backgroundColor: "hsl(var(--card))",
-        border: "1px solid hsl(var(--border))",
+        backgroundColor: "hsl(0, 0%, 100%)",
+        border: "1px solid hsl(165, 15%, 94%)",
         boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
       },
       headerTitle: {
-        color: "hsl(var(--foreground))",
+        color: "hsl(195, 35%, 15%)",
       },
       headerSubtitle: {
-        color: "hsl(var(--muted-foreground))",
+        color: "hsl(195, 25%, 45%)",
       },
       socialButtonsBlockButton: {
-        backgroundColor: "hsl(var(--secondary))",
-        border: "1px solid hsl(var(--border))",
-        color: "hsl(var(--secondary-foreground))",
+        backgroundColor: "hsl(165, 50%, 85%)",
+        border: "1px solid hsl(165, 15%, 94%)",
+        color: "hsl(195, 35%, 10%)",
         "&:hover": {
-          backgroundColor: "hsl(var(--secondary))",
+          backgroundColor: "hsl(165, 50%, 85%)",
           opacity: 0.8,
         },
       },
       formFieldInput: {
-        backgroundColor: "hsl(var(--input))",
-        border: "1px solid hsl(var(--border))",
-        color: "hsl(var(--foreground))",
+        backgroundColor: "hsl(165, 15%, 96%)",
+        border: "1px solid hsl(165, 15%, 94%)",
+        color: "hsl(195, 35%, 15%)",
         "&:focus": {
           borderColor: "hsl(174, 55%, 40%)",
           boxShadow: "0 0 0 2px hsl(174, 55%, 40%, 0.2)",

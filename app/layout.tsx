@@ -20,7 +20,36 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        baseTheme: undefined,
+        variables: {
+          colorPrimary: "hsl(174, 55%, 40%)",
+          colorDanger: "hsl(0, 84.2%, 60.2%)",
+          colorSuccess: "hsl(158, 70%, 40%)",
+          colorWarning: "hsl(45, 90%, 50%)",
+          colorNeutral: "hsl(195, 25%, 45%)",
+          colorText: "hsl(195, 35%, 15%)",
+          colorTextSecondary: "hsl(195, 25%, 45%)",
+          colorBackground: "hsl(0, 0%, 100%)",
+          colorInputBackground: "hsl(165, 15%, 96%)",
+          colorInputText: "hsl(195, 35%, 15%)",
+          borderRadius: "0.75rem",
+        },
+        elements: {
+          formButtonPrimary: {
+            backgroundColor: "hsl(174, 55%, 40%)",
+            "&:hover": {
+              backgroundColor: "hsl(174, 55%, 35%)",
+            },
+          },
+          card: {
+            backgroundColor: "hsl(0, 0%, 100%)",
+            borderColor: "hsl(165, 15%, 94%)",
+          },
+        },
+      }}
+    >
       <html lang="en" suppressHydrationWarning>
         <body className={cn(inter.className, "antialiased")}>
           <ThemeProvider
