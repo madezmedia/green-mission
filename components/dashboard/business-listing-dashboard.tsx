@@ -18,7 +18,7 @@ import {
   CheckCircle, 
   Clock, 
   AlertCircle,
-  Sync,
+  RefreshCw,
   Save
 } from "lucide-react"
 import BusinessListingForm from "./business-listing-form"
@@ -239,12 +239,12 @@ export default function BusinessListingDashboard() {
           >
             {syncing ? (
               <>
-                <Sync className="h-4 w-4 mr-2 animate-spin" />
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
                 Syncing...
               </>
             ) : (
               <>
-                <Sync className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Sync with Airtable
               </>
             )}
@@ -295,7 +295,7 @@ export default function BusinessListingDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Last Synced</CardTitle>
-            <Sync className="h-4 w-4 text-muted-foreground" />
+            <RefreshCw className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">

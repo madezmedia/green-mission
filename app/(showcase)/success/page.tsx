@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,7 @@ import { CheckCircle, Loader2, Building2, User, Mail, Phone, MapPin } from "luci
 import ShowcaseNavigation from "@/components/showcase/showcase-navigation"
 import ShowcaseFooter from "@/components/showcase/showcase-footer"
 
-export default function SuccessPage() {
+function SuccessPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [step, setStep] = useState(1)
@@ -406,4 +406,23 @@ export default function SuccessPage() {
   }
 
   return null
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800">
+        <div className="container mx-auto px-4 py-16">
+          <div className="flex min-h-screen items-center justify-center">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <SuccessPageContent />
+    </Suspense>
+  )
 }
