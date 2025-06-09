@@ -5,6 +5,7 @@ import { useState } from "react"
 import { Leaf, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import ShowcaseThemeSwitcher from "./showcase-theme-switcher"
 
 const navItems = [
   { name: "Home", href: "#hero" },
@@ -17,11 +18,11 @@ export default function ShowcaseNavigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md transition-all duration-500">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
-            <Leaf className="h-5 w-5 text-primary-foreground" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
+            <Leaf className="h-5 w-5 text-white" />
           </div>
           <span className="text-xl font-bold text-primary">Green Mission</span>
         </Link>
@@ -36,6 +37,7 @@ export default function ShowcaseNavigation() {
               {item.name}
             </Link>
           ))}
+          <ShowcaseThemeSwitcher />
           <Button asChild>
             <Link href="/dashboard">Member Login</Link>
           </Button>
@@ -54,8 +56,8 @@ export default function ShowcaseNavigation() {
           <SheetContent side="right" className="w-full max-w-xs">
             <div className="p-6">
               <Link href="/" className="mb-8 flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
-                  <Leaf className="h-5 w-5 text-primary-foreground" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
+                  <Leaf className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-xl font-bold text-primary">Green Mission</span>
               </Link>
@@ -70,12 +72,15 @@ export default function ShowcaseNavigation() {
                     {item.name}
                   </Link>
                 ))}
-                <Button asChild className="mt-4">
-                  <Link href="/dashboard">Member Login</Link>
-                </Button>
-                <Button variant="secondary" asChild>
-                  <Link href="/join">Join Now</Link>
-                </Button>
+                <div className="mt-4 flex flex-col gap-4">
+                  <ShowcaseThemeSwitcher />
+                  <Button asChild>
+                    <Link href="/dashboard">Member Login</Link>
+                  </Button>
+                  <Button variant="secondary" asChild>
+                    <Link href="/join">Join Now</Link>
+                  </Button>
+                </div>
               </nav>
             </div>
           </SheetContent>

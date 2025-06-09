@@ -3,7 +3,6 @@
 import { Search, Bell, Leaf, Menu } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,11 +12,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { UserButton, useUser } from "@clerk/nextjs"
 import AppSidebar from "./app-sidebar"
 import { useState } from "react"
 import ThemeSwitcher from "./theme-switcher"
 
 export default function AppHeader() {
+  const { user } = useUser()
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
   return (
@@ -82,30 +83,17 @@ export default function AppHeader() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder.svg?width=32&height=32" alt="@user" />
-                <AvatarFallback className="bg-gradient-primary text-white">GM</AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Green User</p>
-                <p className="text-xs leading-none text-muted-foreground">user@greenmission.com</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile Settings</DropdownMenuItem>
-            <DropdownMenuItem>Billing</DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Log out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/* Use Clerk's UserButton for user menu */}
+        <UserButton
+          afterSignOutUrl="/"
+          appearance={{
+            elements: {
+              avatarBox: "h-8 w-8",
+              userButtonPopoverCard: "bg-card border border-border",
+              userButtonPopoverActionButton: "text-foreground hover:bg-muted",
+            },
+          }}
+        />
       </div>
     </header>
   )

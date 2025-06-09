@@ -5,6 +5,8 @@ import FeaturedMembersSection from "@/components/showcase/featured-members-secti
 import MembershipSection from "@/components/showcase/membership-section"
 import AboutSection from "@/components/showcase/about-section"
 import ShowcaseFooter from "@/components/showcase/showcase-footer"
+import TestimonialsSection from "@/components/showcase/testimonials-section"
+import FeaturesSection from "@/components/showcase/features-section"
 
 export default function ShowcasePage() {
   return (
@@ -13,7 +15,9 @@ export default function ShowcasePage() {
       <main>
         <HeroSection />
         <StatsSection />
+        <FeaturesSection />
         <FeaturedMembersSection />
+        <TestimonialsSection />
         <MembershipSection />
         <AboutSection />
       </main>
