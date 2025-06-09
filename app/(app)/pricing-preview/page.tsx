@@ -1,16 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import PaymentLinkButton from "@/components/pricing/payment-link-button"
-import { Check, Star, ExternalLink, CreditCard, Zap } from "lucide-react"
+import { Check, Star, ExternalLink, CreditCard, Zap, Loader2 } from "lucide-react"
+
+// Force dynamic rendering to prevent prerendering issues
+export const dynamic = "force-dynamic"
 
 export default function PricingPreviewPage() {
   const [isYearly, setIsYearly] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  // Ensure component only renders on client side
+  useEffect(() => {
+    setIsLoaded(true)
+  }, [])
 
   // Mock payment links for preview
   const mockPaymentLinks = {
@@ -57,6 +66,18 @@ export default function PricingPreviewPage() {
       popular: false,
     },
   ]
+
+  // Show loading state during hydration
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading pricing preview...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">

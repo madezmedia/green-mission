@@ -1,11 +1,12 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { ExternalLink, Loader2 } from "lucide-react"
 import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { ExternalLink, CreditCard, AlertCircle } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface PaymentLinkButtonProps {
-  paymentLinkUrl: string
+  paymentLinkUrl?: string
   tier: string
   billing: "monthly" | "yearly"
   price: number
@@ -23,50 +24,63 @@ export default function PaymentLinkButton({
   currentTier = false,
   className = "",
 }: PaymentLinkButtonProps) {
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleClick = async () => {
-    setLoading(true)
-
-    try {
-      // Open payment link in new tab
-      window.open(paymentLinkUrl, "_blank", "noopener,noreferrer")
-    } catch (error) {
-      console.error("Failed to open payment link:", error)
-    } finally {
-      // Reset loading state after a short delay
-      setTimeout(() => setLoading(false), 1000)
+  const handleClick = () => {
+    if (!paymentLinkUrl) {
+      // Show configuration message for preview mode
+      alert("This is a preview. Configure Stripe payment links to enable payments.")
+      return
     }
+
+    setIsLoading(true)
+
+    // Open payment link in new tab
+    window.open(paymentLinkUrl, "_blank", "noopener,noreferrer")
+
+    // Reset loading state after a short delay
+    setTimeout(() => setIsLoading(false), 1000)
   }
 
   if (currentTier) {
     return (
-      <Button disabled className={`w-full ${className}`} size="lg">
+      <Button disabled className={`w-full ${className}`} variant="outline">
+        <CreditCard className="w-4 h-4 mr-2" />
         Current Plan
       </Button>
     )
   }
 
+  const isPreview = !paymentLinkUrl || paymentLinkUrl.includes("test_")
+
   return (
-    <Button
-      size="lg"
-      className={`w-full transition-all ${
-        popular ? "bg-gradient-primary hover:shadow-lg hover:scale-105" : "hover:bg-primary hover:scale-105"
-      } ${className}`}
-      onClick={handleClick}
-      disabled={loading}
-    >
-      {loading ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Opening...
-        </>
-      ) : (
-        <>
-          Subscribe for ${price}/{billing === "monthly" ? "mo" : "yr"}
-          <ExternalLink className="ml-2 h-4 w-4" />
-        </>
+    <div className="space-y-2">
+      <Button
+        onClick={handleClick}
+        disabled={isLoading}
+        className={`w-full ${className}`}
+        variant={popular ? "default" : "outline"}
+        size="lg"
+      >
+        {isLoading ? (
+          <>
+            <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            Opening...
+          </>
+        ) : (
+          <>
+            <ExternalLink className="w-4 h-4 mr-2" />
+            {isPreview ? "Preview" : "Subscribe"} - ${price}/{billing === "yearly" ? "year" : "month"}
+          </>
+        )}
+      </Button>
+
+      {isPreview && (
+        <Alert className="text-xs">
+          <AlertCircle className="h-3 w-3" />
+          <AlertDescription>Preview mode - Configure Stripe to enable payments</AlertDescription>
+        </Alert>
       )}
-    </Button>
+    </div>
   )
 }
