@@ -1,9 +1,48 @@
 import { Redis } from "@upstash/redis"
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-})
+// Helper function to convert rediss:// URL to https:// format
+function convertRedisUrl(url: string): string {
+  if (!url) return ""
+
+  // If it's already https, return as is
+  if (url.startsWith("https://")) {
+    return url
+  }
+
+  // Convert rediss:// to https://
+  if (url.startsWith("rediss://")) {
+    // Extract the host and credentials from rediss URL
+    const match = url.match(/rediss:\/\/([^@]+)@([^:]+):(\d+)/)
+    if (match) {
+      const [, credentials, host] = match
+      return `https://${credentials}@${host}`
+    }
+  }
+
+  return url
+}
+
+// Check if Redis is configured and available
+function isRedisConfigured(): boolean {
+  return !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+}
+
+// Create Redis client only if configured
+let redis: Redis | null = null
+
+if (isRedisConfigured()) {
+  try {
+    const restUrl = convertRedisUrl(process.env.UPSTASH_REDIS_REST_URL!)
+
+    redis = new Redis({
+      url: restUrl,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    })
+  } catch (error) {
+    console.warn("Redis configuration failed, running without cache:", error)
+    redis = null
+  }
+}
 
 // Cache key patterns for different services
 export const CACHE_KEYS = {
@@ -47,9 +86,10 @@ export const CACHE_TTL = {
   VERY_LONG: 86400, // 24 hours - rarely changing content
 }
 
-// Enhanced cache utility class
+// Enhanced cache utility class with fallback when Redis is not available
 export class CacheManager {
-  private redis: Redis
+  private redis: Redis | null
+  private memoryCache: Map<string, { value: any; expires: number }> = new Map()
 
   constructor() {
     this.redis = redis
@@ -58,10 +98,19 @@ export class CacheManager {
   // Generic get with automatic JSON parsing
   async get<T>(key: string): Promise<T | null> {
     try {
-      const value = await this.redis.get(key)
-      return value as T
+      if (this.redis) {
+        const value = await this.redis.get(key)
+        return value as T
+      } else {
+        // Fallback to memory cache
+        const cached = this.memoryCache.get(key)
+        if (cached && cached.expires > Date.now()) {
+          return cached.value as T
+        }
+        return null
+      }
     } catch (error) {
-      console.error(`Cache get error for key ${key}:`, error)
+      console.warn(`Cache get error for key ${key}:`, error)
       return null
     }
   }
@@ -69,10 +118,19 @@ export class CacheManager {
   // Generic set with automatic JSON stringification
   async set<T>(key: string, value: T, ttl: number = CACHE_TTL.MEDIUM): Promise<boolean> {
     try {
-      await this.redis.setex(key, ttl, JSON.stringify(value))
-      return true
+      if (this.redis) {
+        await this.redis.setex(key, ttl, JSON.stringify(value))
+        return true
+      } else {
+        // Fallback to memory cache
+        this.memoryCache.set(key, {
+          value,
+          expires: Date.now() + ttl * 1000,
+        })
+        return true
+      }
     } catch (error) {
-      console.error(`Cache set error for key ${key}:`, error)
+      console.warn(`Cache set error for key ${key}:`, error)
       return false
     }
   }
@@ -80,10 +138,15 @@ export class CacheManager {
   // Delete single key
   async del(key: string): Promise<boolean> {
     try {
-      await this.redis.del(key)
-      return true
+      if (this.redis) {
+        await this.redis.del(key)
+        return true
+      } else {
+        this.memoryCache.delete(key)
+        return true
+      }
     } catch (error) {
-      console.error(`Cache delete error for key ${key}:`, error)
+      console.warn(`Cache delete error for key ${key}:`, error)
       return false
     }
   }
@@ -91,13 +154,26 @@ export class CacheManager {
   // Delete multiple keys by pattern
   async delPattern(pattern: string): Promise<number> {
     try {
-      const keys = await this.redis.keys(pattern)
-      if (keys.length > 0) {
-        return await this.redis.del(...keys)
+      if (this.redis) {
+        const keys = await this.redis.keys(pattern)
+        if (keys.length > 0) {
+          return await this.redis.del(...keys)
+        }
+        return 0
+      } else {
+        // For memory cache, delete matching keys
+        let deleted = 0
+        const regex = new RegExp(pattern.replace(/\*/g, ".*"))
+        for (const key of this.memoryCache.keys()) {
+          if (regex.test(key)) {
+            this.memoryCache.delete(key)
+            deleted++
+          }
+        }
+        return deleted
       }
-      return 0
     } catch (error) {
-      console.error(`Cache pattern delete error for pattern ${pattern}:`, error)
+      console.warn(`Cache pattern delete error for pattern ${pattern}:`, error)
       return 0
     }
   }
@@ -119,14 +195,34 @@ export class CacheManager {
 
       return freshData
     } catch (error) {
-      console.error(`Cache getOrSet error for key ${key}:`, error)
+      console.warn(`Cache getOrSet error for key ${key}:`, error)
       // If cache fails, still return fresh data
       return await fetchFunction()
     }
   }
 
+  // Check if Redis is available
+  isRedisAvailable(): boolean {
+    return this.redis !== null
+  }
+
+  // Clean up expired memory cache entries
+  private cleanupMemoryCache(): void {
+    const now = Date.now()
+    for (const [key, cached] of this.memoryCache.entries()) {
+      if (cached.expires <= now) {
+        this.memoryCache.delete(key)
+      }
+    }
+  }
+
   // Cache warming - preload frequently accessed data
   async warmCache(): Promise<void> {
+    if (!this.isRedisAvailable()) {
+      console.log("Redis not available, skipping cache warming")
+      return
+    }
+
     console.log("Starting cache warming...")
 
     try {
@@ -143,45 +239,53 @@ export class CacheManager {
   }
 
   private async warmAirtableCache(): Promise<void> {
-    const {
-      getGreenMissionMemberBusinesses,
-      getGreenMissionMembershipTiers,
-      getGreenMissionDirectoryCategories,
-      getGreenMissionBlogPosts,
-    } = await import("../airtable/green-mission-client")
+    try {
+      const {
+        getGreenMissionMemberBusinesses,
+        getGreenMissionMembershipTiers,
+        getGreenMissionDirectoryCategories,
+        getGreenMissionBlogPosts,
+      } = await import("../airtable/green-mission-client")
 
-    // Warm membership tiers
-    const tiers = await getGreenMissionMembershipTiers(true)
-    await this.set(CACHE_KEYS.AIRTABLE.MEMBERSHIP_TIERS, tiers, CACHE_TTL.VERY_LONG)
+      // Warm membership tiers
+      const tiers = await getGreenMissionMembershipTiers(true)
+      await this.set(CACHE_KEYS.AIRTABLE.MEMBERSHIP_TIERS, tiers, CACHE_TTL.VERY_LONG)
 
-    // Warm directory categories
-    const categories = await getGreenMissionDirectoryCategories(true)
-    await this.set(CACHE_KEYS.AIRTABLE.DIRECTORY_CATEGORIES, categories, CACHE_TTL.LONG)
+      // Warm directory categories
+      const categories = await getGreenMissionDirectoryCategories(true)
+      await this.set(CACHE_KEYS.AIRTABLE.DIRECTORY_CATEGORIES, categories, CACHE_TTL.LONG)
 
-    // Warm featured members
-    const featuredMembers = await getGreenMissionMemberBusinesses({
-      featuredMember: true,
-      membershipStatus: "Active",
-      limit: 6,
-    })
-    await this.set(CACHE_KEYS.AIRTABLE.FEATURED_MEMBERS, featuredMembers, CACHE_TTL.MEDIUM)
+      // Warm featured members
+      const featuredMembers = await getGreenMissionMemberBusinesses({
+        featuredMember: true,
+        membershipStatus: "Active",
+        limit: 6,
+      })
+      await this.set(CACHE_KEYS.AIRTABLE.FEATURED_MEMBERS, featuredMembers, CACHE_TTL.MEDIUM)
 
-    // Warm recent blog posts
-    const blogPosts = await getGreenMissionBlogPosts({ limit: 10 })
-    await this.set(CACHE_KEYS.AIRTABLE.BLOG_POSTS, blogPosts, CACHE_TTL.MEDIUM)
+      // Warm recent blog posts
+      const blogPosts = await getGreenMissionBlogPosts({ limit: 10 })
+      await this.set(CACHE_KEYS.AIRTABLE.BLOG_POSTS, blogPosts, CACHE_TTL.MEDIUM)
+    } catch (error) {
+      console.warn("Airtable cache warming failed:", error)
+    }
   }
 
   private async warmStripeCache(): Promise<void> {
-    const stripe = (await import("stripe")).default
-    const stripeClient = new stripe(process.env.STRIPE_SECRET_KEY!)
+    try {
+      const stripe = (await import("stripe")).default
+      const stripeClient = new stripe(process.env.STRIPE_SECRET_KEY!)
 
-    // Warm Stripe prices
-    const prices = await stripeClient.prices.list({ active: true })
-    await this.set(CACHE_KEYS.STRIPE.PRICES, prices.data, CACHE_TTL.LONG)
+      // Warm Stripe prices
+      const prices = await stripeClient.prices.list({ active: true })
+      await this.set(CACHE_KEYS.STRIPE.PRICES, prices.data, CACHE_TTL.LONG)
 
-    // Warm Stripe products
-    const products = await stripeClient.products.list({ active: true })
-    await this.set(CACHE_KEYS.STRIPE.PRODUCTS, products.data, CACHE_TTL.LONG)
+      // Warm Stripe products
+      const products = await stripeClient.products.list({ active: true })
+      await this.set(CACHE_KEYS.STRIPE.PRODUCTS, products.data, CACHE_TTL.LONG)
+    } catch (error) {
+      console.warn("Stripe cache warming failed:", error)
+    }
   }
 }
 
@@ -483,9 +587,18 @@ export class CacheInvalidationHandlers {
 // Performance monitoring
 export class CacheMetrics {
   static async getCacheStats() {
-    try {
-      const info = await redis.info()
+    if (!cacheManager.isRedisAvailable()) {
       return {
+        type: "memory",
+        available: true,
+        entries: cacheManager.memoryCache?.size || 0,
+      }
+    }
+
+    try {
+      const info = await redis!.info()
+      return {
+        type: "redis",
         memory: info.used_memory_human,
         connections: info.connected_clients,
         operations: info.total_commands_processed,
