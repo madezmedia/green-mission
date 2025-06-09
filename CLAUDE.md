@@ -43,6 +43,8 @@ tsx scripts/seed-airtable.ts                   # Seed Airtable with sample data
 - **Environment Variables**: 
   - Each base can have individual API keys or shared `AIRTABLE_API_KEY`
   - Format: `AIRTABLE_{CMS|DIR|BRAND}_BASE_ID` and `AIRTABLE_{CMS|DIR|BRAND}_API_KEY`
+  - Copy `.env.example` to `.env.local` and fill in your actual API keys
+- **2-Way Sync**: Dashboard supports full CRUD operations with real-time sync to/from Airtable
 
 ### Component Architecture
 - **UI Components**: shadcn/ui components in `components/ui/`
@@ -63,6 +65,9 @@ tsx scripts/seed-airtable.ts                   # Seed Airtable with sample data
 - **Styling**: Tailwind CSS with custom Green Mission theme variables
 - **UI Library**: Radix UI components (shadcn/ui)
 - **Database**: Airtable (multi-base setup)
+- **Authentication**: Clerk
+- **Payments**: Stripe with subscription management
+- **Cache**: Upstash Redis (optional)
 - **Theme**: next-themes with custom light/dark themes
 - **State**: React hooks, no global state management
 - **TypeScript**: Strict mode enabled
@@ -74,6 +79,27 @@ tsx scripts/seed-airtable.ts                   # Seed Airtable with sample data
 - **Environment Setup**: Use setup script for multi-base Airtable configuration
 - **API Endpoints**: `/api/configuration/status` for Airtable connection testing
 
+## Environment Setup
+
+### Required Services
+1. **Airtable**: Create 3 bases (CMS, Directory, Branding) and get API keys
+2. **Clerk**: Set up authentication project at dashboard.clerk.com
+3. **Stripe**: Configure payment processing at dashboard.stripe.com
+4. **Upstash Redis**: Optional caching service at upstash.com
+
+### Environment Variables
+Copy `.env.example` to `.env.local` and configure:
+
+**Critical**: Replace these placeholder values with actual secrets:
+- `CLERK_WEBHOOK_SECRET` - Get from Clerk webhook configuration
+- `STRIPE_WEBHOOK_SECRET` - Get from Stripe webhook configuration
+
+**Current Issues Fixed**:
+- ✅ Consolidated all Airtable API keys to use same token
+- ✅ Fixed incorrect webhook secrets
+- ✅ Organized variables by service with clear comments
+- ✅ Set local development URL instead of Vercel URL
+
 ## Important Notes
 
 - Build ignores ESLint and TypeScript errors (`next.config.mjs`)
@@ -82,3 +108,4 @@ tsx scripts/seed-airtable.ts                   # Seed Airtable with sample data
 - Airtable field names use exact case from Airtable (e.g., "Business Name", "Featured Member")
 - Theme switching uses CSS custom properties with `hsl(var(--color-name))` pattern
 - No test framework configured - tests should be added if comprehensive testing is needed
+- **Business Listing Management**: Dashboard now supports full CRUD operations with 2-way Airtable sync
