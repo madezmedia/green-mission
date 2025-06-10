@@ -56,10 +56,12 @@ export interface MemberBusiness extends FieldSet {
   City?: string
   State?: string
   "ZIP Code"?: string
+  Country?: string
   Coordinates?: string // "latitude,longitude"
   "Industry Category"?: readonly string[] // Link to Directory Categories
   "Business Tags"?: string[]
   "Services Offered"?: string[]
+  "Sustainability Practices"?: string
   "Membership Tier"?: readonly string[] // Link to Membership Tiers
   "Member Since"?: string // Date
   "Membership Status": "Active" | "Pending" | "Suspended" | "Expired"
@@ -72,6 +74,7 @@ export interface MemberBusiness extends FieldSet {
   "Contact Preferences"?: string[]
   "Newsletter Subscription"?: boolean
   "Directory Visibility"?: boolean
+  "User ID"?: string // Clerk User ID for linking records
   "Last Updated"?: string // Last Modified Time
 }
 
@@ -778,22 +781,59 @@ export async function updateGreenMissionMemberBusiness(id: string, updates: Part
 export class GreenMissionClient {
   // Get members with filtering options
   async getMembers(options: { filterByFormula?: string } = {}) {
-    return await getGreenMissionMemberBusinesses({
-      limit: 1000,
-      ...options
-    })
+    try {
+      const base = getGreenMissionAirtableBase("directory")
+      const table = base("Member Businesses")
+      
+      const selectOptions: any = {
+        maxRecords: 1000
+      }
+      
+      if (options.filterByFormula) {
+        selectOptions.filterByFormula = options.filterByFormula
+      }
+      
+      const records = await table.select(selectOptions).all()
+      
+      return records.map((record: Record<Partial<MemberBusiness>>) => ({
+        id: record.id,
+        fields: {
+          "Business Name": record.get("Business Name"),
+          "Business Description": record.get("Business Description"),
+          "Website": record.get("Website"),
+          "Email": record.get("Email"),
+          "Phone": record.get("Phone"),
+          "Business Address": record.get("Business Address"),
+          "City": record.get("City"),
+          "State": record.get("State"),
+          "Country": record.get("Country"),
+          "Sustainability Practices": record.get("Sustainability Practices"),
+          "Certifications": record.get("Certifications"),
+          "Business Tags": record.get("Business Tags"),
+          "Membership Status": record.get("Membership Status"),
+          "User ID": record.get("User ID"),
+          "Last Updated": record.get("Last Updated")
+        }
+      }))
+    } catch (error) {
+      console.error("Error fetching members:", error)
+      throw error
+    }
   }
 
   // Create a new member business
   async createMember(memberData: any) {
     try {
+      console.log("GreenMissionClient.createMember - Input data:", JSON.stringify(memberData, null, 2))
       const base = getGreenMissionAirtableBase("directory")
       const table = base("Member Businesses")
       
       const records = await table.create([{ fields: memberData }])
+      console.log("GreenMissionClient.createMember - Success:", records[0].id)
       return records[0]
     } catch (error) {
-      console.error("Error creating member:", error)
+      console.error("GreenMissionClient.createMember - Error:", error)
+      console.error("GreenMissionClient.createMember - Error details:", error instanceof Error ? error.message : error)
       throw error
     }
   }

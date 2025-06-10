@@ -44,17 +44,24 @@ interface BusinessListing {
   lastSynced?: string
 }
 
-export default function BusinessListingDashboard() {
+interface BusinessListingDashboardProps {
+  initialListing?: BusinessListing | null
+}
+
+export default function BusinessListingDashboard({ initialListing }: BusinessListingDashboardProps) {
   const { user } = useUser()
-  const [listing, setListing] = useState<BusinessListing | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [listing, setListing] = useState<BusinessListing | null>(initialListing || null)
+  const [loading, setLoading] = useState(!initialListing)
   const [syncing, setSyncing] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
 
   useEffect(() => {
-    fetchBusinessListing()
-  }, [user])
+    // Only fetch if we don't have an initial listing
+    if (!initialListing) {
+      fetchBusinessListing()
+    }
+  }, [user, initialListing])
 
   const fetchBusinessListing = async () => {
     try {
@@ -103,7 +110,7 @@ export default function BusinessListingDashboard() {
   const saveListing = async (updatedListing: BusinessListing) => {
     try {
       const response = await fetch("/api/business-listing", {
-        method: listing ? "PUT" : "POST",
+        method: "POST", // Always use POST since it handles upsert
         headers: {
           "Content-Type": "application/json"
         },
@@ -115,7 +122,7 @@ export default function BusinessListingDashboard() {
         setListing(data.listing)
         setHasUnsavedChanges(false)
         setIsEditing(false)
-        toast.success(listing ? "Listing updated successfully" : "Listing created successfully")
+        toast.success(data.message || "Listing saved successfully")
       } else {
         throw new Error(data.error)
       }
