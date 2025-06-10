@@ -34,6 +34,26 @@ export async function POST(request: NextRequest) {
       case "user.deleted":
         await handleUserDeleted(evt.data)
         break
+
+      case "organization.created":
+        await handleOrganizationCreated(evt.data)
+        break
+
+      case "organization.updated":
+        await handleOrganizationUpdated(evt.data)
+        break
+
+      case "organization.deleted":
+        await handleOrganizationDeleted(evt.data)
+        break
+
+      case "organizationMembership.created":
+        await handleOrganizationMembershipCreated(evt.data)
+        break
+
+      case "organizationMembership.deleted":
+        await handleOrganizationMembershipDeleted(evt.data)
+        break
     }
 
     return NextResponse.json({ received: true })
@@ -102,4 +122,59 @@ async function handleUserDeleted(userData: any) {
 
   // Note: We typically don't delete Stripe customers for compliance reasons
   // but we can mark them as inactive or add metadata
+}
+
+async function handleOrganizationCreated(orgData: any) {
+  console.log("Organization created:", orgData.id)
+  // Organization creation is handled in our API, so just log
+}
+
+async function handleOrganizationUpdated(orgData: any) {
+  console.log("Organization updated:", orgData.id)
+  
+  // Sync name changes to Airtable
+  const airtableRecordId = orgData.private_metadata?.airtableRecordId
+  if (airtableRecordId) {
+    try {
+      const { greenMissionClient } = await import("@/lib/airtable/green-mission-client")
+      await greenMissionClient.updateMember(airtableRecordId, {
+        "Business Name": orgData.name,
+        "Slug": orgData.slug,
+        "Last Updated": new Date().toISOString(),
+      })
+      console.log('Synced organization update to Airtable')
+    } catch (error) {
+      console.error("Failed to sync organization update to Airtable:", error)
+    }
+  }
+}
+
+async function handleOrganizationDeleted(orgData: any) {
+  console.log("Organization deleted:", orgData.id)
+  
+  // Handle organization deletion (soft delete in Airtable)
+  const recordId = orgData.private_metadata?.airtableRecordId
+  if (recordId) {
+    try {
+      const { greenMissionClient } = await import("@/lib/airtable/green-mission-client")
+      await greenMissionClient.updateMember(recordId, {
+        "Membership Status": "Inactive",
+        "Directory Visibility": false,
+        "Last Updated": new Date().toISOString(),
+      })
+      console.log('Soft deleted organization in Airtable')
+    } catch (error) {
+      console.error("Failed to soft delete organization in Airtable:", error)
+    }
+  }
+}
+
+async function handleOrganizationMembershipCreated(membershipData: any) {
+  console.log("Organization membership created:", membershipData.id)
+  // Could update member count or other stats in Airtable
+}
+
+async function handleOrganizationMembershipDeleted(membershipData: any) {
+  console.log("Organization membership deleted:", membershipData.id)
+  // Could update member count or other stats in Airtable
 }

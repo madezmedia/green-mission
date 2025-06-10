@@ -50,6 +50,9 @@ export default function DirectoryPage() {
         setLoading(true)
         const params = new URLSearchParams()
         
+        // Only fetch members with directory visibility enabled
+        params.append("visibility", "true")
+        
         if (selectedCategory !== "all") {
           params.append("category", selectedCategory)
         }
@@ -58,14 +61,22 @@ export default function DirectoryPage() {
         }
         params.append("limit", "50")
 
+        console.log("Fetching members with params:", params.toString())
         const response = await fetch(`/api/members?${params}`)
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+        
         const data: ApiResponse = await response.json()
+        console.log("API Response:", data)
 
-        if (data.success) {
+        if (data.success && data.members) {
           // Transform API data to match our Member type
           const transformedMembers = data.members.map((member: any) => ({
             id: member.id || Math.random(),
             name: member["Business Name"] || member.name || "Unnamed Business",
+            slug: member.Slug || member.slug || member["Business Name"]?.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-'),
             tagline: member["Short Description"] || member.tagline || "Eco-conscious business",
             description: member["Business Description"] || member.description || "No description available",
             logo: member.Logo?.[0]?.url || member.logo || "/placeholder-logo.svg",
@@ -81,13 +92,16 @@ export default function DirectoryPage() {
             featured: member["Featured Member"] || member.featured || false,
             verified: member.verified || true,
           }))
+          console.log("Transformed members:", transformedMembers.length)
           setMembers(transformedMembers)
+          setError(null)
         } else {
-          setError("Failed to fetch members")
+          console.error("API returned unsuccessful response:", data)
+          setError(data.error || "Failed to fetch members")
         }
       } catch (err) {
         console.error("Error fetching members:", err)
-        setError("Failed to load directory")
+        setError(err instanceof Error ? err.message : "Failed to load directory")
       } finally {
         setLoading(false)
       }

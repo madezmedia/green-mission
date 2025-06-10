@@ -23,6 +23,10 @@ pnpm lint         # Run ESLint
 tsx scripts/setup-green-mission-airtable.ts    # Interactive Airtable multi-base setup
 tsx scripts/seed-airtable.ts                   # Seed Airtable with sample data
 
+# Business ID Generation Scripts
+pnpm generate-business-ids        # Generate business IDs for existing records
+pnpm generate-business-ids:check  # Check/validate business ID generation
+
 # Package manager: pnpm (not npm/yarn)
 # Note: No test framework configured
 ```
@@ -55,6 +59,9 @@ tsx scripts/seed-airtable.ts                   # Seed Airtable with sample data
 ### Key Files
 - `lib/airtable/green-mission-client.ts`: All Airtable data access functions
 - `lib/data.ts`: Static/mock data and data transformations
+- `lib/organization-management.ts`: Organization and business listing management
+- `lib/clerk-airtable-sync.ts`: Clerk-Airtable user synchronization
+- `lib/business-id-generator.ts`: Unique business ID generation utility
 - `types/index.ts`: TypeScript interfaces for Member and Category types
 - `components/theme-provider.tsx`: Theme context provider
 - `styles/globals.css`: Custom CSS variables for Green Mission theming
@@ -115,6 +122,13 @@ Copy `.env.example` to `.env.local` and configure:
 - ✅ Server-side data fetching with serialized user data
 - ✅ Fixed field mapping to match actual Airtable schema
 - ✅ Business Tags integration with predefined options: "Sustainable", "Local", "B-Corp", "Women-Owned"
+- ✅ Unique business ID generation system
+- ✅ Organization-based business management
+
+### Organization Management
+- ✅ Clerk organization integration
+- ✅ Organization-specific webhooks and data sync
+- ✅ Multi-organization support architecture
 
 ### Payment Integration
 - ✅ Stripe subscription management

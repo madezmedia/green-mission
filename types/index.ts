@@ -1,6 +1,7 @@
 export type Member = {
   id: number
   name: string
+  slug: string
   tagline: string
   description: string
   logo: string

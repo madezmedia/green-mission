@@ -14,16 +14,6 @@ interface MemberCardProps {
   layout?: "grid" | "list"
 }
 
-// Helper function to create URL-friendly slug
-function createSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim()
-}
-
 export default function MemberCard({ member, layout = "grid" }: MemberCardProps) {
   const tierColors = {
     Enterprise: "bg-primary text-primary-foreground",
@@ -31,7 +21,7 @@ export default function MemberCard({ member, layout = "grid" }: MemberCardProps)
     Basic: "bg-accent text-accent-foreground",
   }
 
-  const memberSlug = createSlug(member.name)
+  const memberSlug = member.slug || member.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-')
 
   if (layout === "list") {
     return (

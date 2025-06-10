@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { greenMissionClient } from "@/lib/airtable/green-mission-client"
+import { generateBusinessIdentifiers } from "@/lib/business-id-generator"
 
 // Helper function to map form data to Airtable format
 function mapToAirtableFormat(formData: any, userId: string) {
@@ -153,15 +154,41 @@ export async function POST(request: NextRequest) {
         message: "Business listing updated successfully"
       })
     } else {
-      // Create new record
-      const createdRecord = await greenMissionClient.createMember(airtableData)
-      const listing = mapFromAirtableFormat(createdRecord)
+      // Create new record - generate Business ID and Slug first
+      console.log("Creating new business listing for:", formData.businessName)
+      
+      try {
+        const { businessId, slug } = await generateBusinessIdentifiers(formData.businessName)
+        console.log("Generated Business ID:", businessId, "Slug:", slug)
+        
+        // Add generated identifiers to the data
+        const newBusinessData = {
+          ...airtableData,
+          "Business ID": businessId,
+          "Slug": slug
+        }
+        
+        const createdRecord = await greenMissionClient.createMember(newBusinessData)
+        const listing = mapFromAirtableFormat(createdRecord)
 
-      return NextResponse.json({
-        success: true,
-        listing,
-        message: "Business listing created successfully"
-      })
+        return NextResponse.json({
+          success: true,
+          listing,
+          message: "Business listing created successfully"
+        })
+      } catch (idGenerationError) {
+        console.error("Error generating business identifiers:", idGenerationError)
+        
+        // Fallback without auto-generated IDs
+        const createdRecord = await greenMissionClient.createMember(airtableData)
+        const listing = mapFromAirtableFormat(createdRecord)
+
+        return NextResponse.json({
+          success: true,
+          listing,
+          message: "Business listing created successfully (manual ID generation required)"
+        })
+      }
     }
   } catch (error) {
     console.error("Error saving business listing:", error)

@@ -375,9 +375,11 @@ export async function getGreenMissionMemberBusinesses(
     let filterFormula = ""
     const conditions: string[] = []
 
-    // Only filter by Directory Visibility if explicitly set to false
-    if (options.directoryVisibility === false) {
-      conditions.push('{"Directory Visibility"} = FALSE()')
+    // Filter by Directory Visibility 
+    if (options.directoryVisibility === true) {
+      conditions.push('{Directory Visibility} = TRUE()')
+    } else if (options.directoryVisibility === false) {
+      conditions.push('{Directory Visibility} = FALSE()')
     }
     // If not specified, show all regardless of Directory Visibility
 
@@ -387,11 +389,11 @@ export async function getGreenMissionMemberBusinesses(
     // If not specified, show all membership statuses (Active, Pending, etc.)
 
     if (options.featuredMember) {
-      conditions.push('{"Featured Member"} = TRUE()')
+      conditions.push('{Featured Member} = TRUE()')
     }
 
     if (options.directorySpotlight) {
-      conditions.push('{"Directory Spotlight"} = TRUE()')
+      conditions.push('{Directory Spotlight} = TRUE()')
     }
 
     if (options.industryCategory) {
@@ -799,6 +801,8 @@ export class GreenMissionClient {
         id: record.id,
         fields: {
           "Business Name": record.get("Business Name"),
+          "Business ID": record.get("Business ID"),
+          "Slug": record.get("Slug"),
           "Business Description": record.get("Business Description"),
           "Website": record.get("Website"),
           "Email": record.get("Email"),
@@ -811,6 +815,9 @@ export class GreenMissionClient {
           "Certifications": record.get("Certifications"),
           "Business Tags": record.get("Business Tags"),
           "Membership Status": record.get("Membership Status"),
+          "Featured Member": record.get("Featured Member"),
+          "Directory Spotlight": record.get("Directory Spotlight"),
+          "Directory Visibility": record.get("Directory Visibility"),
           "User ID": record.get("User ID"),
           "Last Updated": record.get("Last Updated")
         }

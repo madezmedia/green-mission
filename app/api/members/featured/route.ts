@@ -8,7 +8,6 @@ export async function GET() {
 
       const featuredMembers = await getGreenMissionMemberBusinesses({
         featuredMember: true,
-        membershipStatus: "Active",
         directoryVisibility: true,
         limit: 6,
       })

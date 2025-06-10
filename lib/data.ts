@@ -4,6 +4,7 @@ export const sampleMembers: Member[] = [
   {
     id: 1,
     name: "EcoTech Solutions",
+    slug: "ecotech-solutions",
     tagline: "Renewable energy for the future",
     description: "Leading provider of solar and wind energy solutions for businesses and communities.",
     logo: "/ecotech-solutions-logo.png",
@@ -22,6 +23,7 @@ export const sampleMembers: Member[] = [
   {
     id: 2,
     name: "Green Packaging Co.",
+    slug: "green-packaging-co",
     tagline: "Sustainable packaging solutions",
     description: "Innovative biodegradable and compostable packaging for e-commerce and retail.",
     logo: "/green-packaging-co-logo.png",

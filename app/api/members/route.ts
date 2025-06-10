@@ -8,9 +8,11 @@ export async function GET(request: NextRequest) {
       membershipStatus: searchParams.get("status") || undefined,
       featuredMember: searchParams.get("featured") === "true" || undefined,
       directorySpotlight: searchParams.get("spotlight") === "true" || undefined,
+      directoryVisibility: searchParams.get("visibility") === "true" || undefined,
       industryCategory: searchParams.get("category") || undefined,
       city: searchParams.get("city") || undefined,
       state: searchParams.get("state") || undefined,
+      slug: searchParams.get("slug") || undefined,
       limit: searchParams.get("limit") ? Number.parseInt(searchParams.get("limit")!) : undefined,
     }
 

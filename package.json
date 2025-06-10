@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate-business-ids": "node scripts/generate-business-ids.js",
+    "generate-business-ids:check": "node scripts/generate-business-ids.js --check"
   },
   "dependencies": {
     "@clerk/nextjs": "latest",

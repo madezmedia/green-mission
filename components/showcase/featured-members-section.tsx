@@ -22,6 +22,7 @@ export default function FeaturedMembersSection() {
           const transformedMembers = data.members.slice(0, 3).map((member: any) => ({
             id: member.id,
             name: member["Business Name"] || "Business Name",
+            slug: member.Slug || member["Business Name"]?.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-'),
             tagline: member["Short Description"] || "Sustainable business",
             description:
               member["Business Description"] || "A sustainable business committed to environmental responsibility.",
