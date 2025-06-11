@@ -11,16 +11,14 @@ export async function GET() {
     } catch (airtableError) {
       console.warn("Airtable not available for categories, using sample data:", airtableError)
       
-      // Fallback to sample categories
+      // Fallback to sample categories that match our sample data
       categories = [
-        { id: "1", categoryName: "Renewable Energy", memberCount: 15 },
-        { id: "2", categoryName: "Sustainable Food", memberCount: 12 },
-        { id: "3", categoryName: "Eco-Friendly Products", memberCount: 18 },
-        { id: "4", categoryName: "Green Transportation", memberCount: 8 },
-        { id: "5", categoryName: "Waste Management", memberCount: 6 },
-        { id: "6", categoryName: "Organic Farming", memberCount: 10 },
-        { id: "7", categoryName: "Clean Technology", memberCount: 14 },
-        { id: "8", categoryName: "Sustainable Fashion", memberCount: 9 },
+        { id: "energy", categoryName: "Energy & Environment", memberCount: 1 },
+        { id: "manufacturing", categoryName: "Manufacturing", memberCount: 1 },
+        { id: "food", categoryName: "Food & Beverage", memberCount: 1 },
+        { id: "technology", categoryName: "Technology", memberCount: 0 },
+        { id: "consulting", categoryName: "Consulting", memberCount: 0 },
+        { id: "transportation", categoryName: "Transportation", memberCount: 0 },
       ]
     }
 

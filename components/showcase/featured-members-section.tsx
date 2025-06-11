@@ -36,7 +36,9 @@ export default function FeaturedMembersSection() {
             sustainabilityScore: member["Sustainability Score"] || 85,
             certifications: member.Certifications || ["Eco-Certified"],
             specialties: member["Services Offered"] || ["Sustainable Practices"],
+            businessTags: member["Business Tags"] || [],
             featured: member["Featured Member"] || true,
+            spotlight: member["Directory Spotlight"] || false,
             verified: member["Membership Status"] === "Active",
           }))
           setMembers(transformedMembers)

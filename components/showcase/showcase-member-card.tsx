@@ -61,6 +61,13 @@ export default function ShowcaseMemberCard({ member }: ShowcaseMemberCardProps) 
       </CardHeader>
       <CardContent className="p-6 pt-0">
         <p className="text-sm text-muted-foreground">{member.description}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {member.businessTags?.map((tag) => (
+            <Badge key={tag} variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+              {tag}
+            </Badge>
+          ))}
+        </div>
         <div className="mt-4 rounded-md bg-muted p-3 text-xs font-medium text-primary">{member.category}</div>
       </CardContent>
     </Card>

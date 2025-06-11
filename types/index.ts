@@ -14,7 +14,9 @@ export type Member = {
   sustainabilityScore: number
   certifications: string[]
   specialties: string[]
+  businessTags: string[]
   featured: boolean
+  spotlight: boolean
   verified: boolean
 }
 

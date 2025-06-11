@@ -46,6 +46,13 @@ export default function MemberCard({ member, layout = "grid" }: MemberCardProps)
                 <Star size={12} className="text-accent fill-accent" /> {member.rating} ({member.reviews} reviews)
               </span>
             </div>
+            <div className="mt-2 flex flex-wrap gap-1">
+              {member.businessTags?.slice(0, 2).map((tag) => (
+                <Badge key={tag} variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
           </div>
           <div className="ml-4 flex flex-col items-end gap-2">
             <Link href={`/directory/${memberSlug}`}>
@@ -78,6 +85,12 @@ export default function MemberCard({ member, layout = "grid" }: MemberCardProps)
           <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground hover:bg-accent/90 shadow-lg">
             <Heart className="mr-1 h-3 w-3" />
             Featured
+          </Badge>
+        )}
+        {member.spotlight && (
+          <Badge className={`absolute ${member.featured ? 'top-12' : 'top-3'} left-3 bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg`}>
+            <Star className="mr-1 h-3 w-3" />
+            Showcase
           </Badge>
         )}
         {member.verified && (
@@ -117,6 +130,11 @@ export default function MemberCard({ member, layout = "grid" }: MemberCardProps)
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
+          {member.businessTags?.map((tag) => (
+            <Badge key={tag} variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+              {tag}
+            </Badge>
+          ))}
           {member.specialties.slice(0, 3).map((spec) => (
             <Badge key={spec} variant="secondary" className="text-xs">
               {spec}
