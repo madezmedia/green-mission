@@ -1,17 +1,77 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
-import "./globals.css"
-import { ThemeProvider } from "@/components/layout/theme-provider"
+import "../styles/globals.css"
 import { ClerkProvider } from "@clerk/nextjs"
 import { cn } from "@/lib/utils"
+import { ThemeProvider } from "@/components/layout/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Green Mission - Membership Directory",
-  description: "Connecting eco-conscious businesses for a sustainable future.",
-    generator: 'v0.dev'
+  title: "Green Mission Club - Sustainable Business Network",
+  description: "Join the largest network of sustainable businesses committed to environmental responsibility and business success. Connect with eco-conscious leaders making a positive impact.",
+  keywords: [
+    "sustainable business",
+    "eco-conscious",
+    "environmental responsibility",
+    "green business network",
+    "sustainable networking",
+    "eco-friendly companies",
+    "environmental impact",
+    "green mission",
+    "sustainable directory"
+  ],
+  authors: [{ name: "Green Mission Club" }],
+  creator: "Green Mission Club",
+  publisher: "Green Mission Club",
+  generator: "Next.js",
+  applicationName: "Green Mission Club",
+  referrer: "origin-when-cross-origin",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://greenmissionclub.com'),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    title: "Green Mission Club - Sustainable Business Network",
+    description: "Join the largest network of sustainable businesses committed to environmental responsibility and business success. Connect with eco-conscious leaders making a positive impact.",
+    siteName: "Green Mission Club",
+    images: [
+      {
+        url: "/gmc-logo-full.png",
+        width: 1200,
+        height: 630,
+        alt: "Green Mission Club - Sustainable Business Network",
+        type: "image/png",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Green Mission Club - Sustainable Business Network",
+    description: "Join the largest network of sustainable businesses committed to environmental responsibility and business success.",
+    images: ["/gmc-logo-full.png"],
+    creator: "@greenmissionclub",
+    site: "@greenmissionclub",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
+  category: "business",
 }
 
 export default function RootLayout({
@@ -51,14 +111,55 @@ export default function RootLayout({
       }}
     >
       <html lang="en" suppressHydrationWarning>
+        <head>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": "Green Mission Club",
+                "alternateName": "Green Mission",
+                "url": process.env.NEXT_PUBLIC_APP_URL || "https://greenmissionclub.com",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": `${process.env.NEXT_PUBLIC_APP_URL || "https://greenmissionclub.com"}/gmc-logo-full.png`,
+                  "width": 1200,
+                  "height": 630
+                },
+                "description": "Join the largest network of sustainable businesses committed to environmental responsibility and business success. Connect with eco-conscious leaders making a positive impact.",
+                "foundingDate": "2024",
+                "contactPoint": {
+                  "@type": "ContactPoint",
+                  "telephone": "+1-555-123-4567",
+                  "contactType": "customer service",
+                  "email": "hello@greenmission.com"
+                },
+                "address": {
+                  "@type": "PostalAddress",
+                  "addressLocality": "San Francisco",
+                  "addressRegion": "CA",
+                  "addressCountry": "US"
+                },
+                "sameAs": [
+                  "https://twitter.com/greenmissionclub",
+                  "https://linkedin.com/company/greenmissionclub",
+                  "https://facebook.com/greenmissionclub"
+                ],
+                "potentialAction": {
+                  "@type": "SearchAction",
+                  "target": {
+                    "@type": "EntryPoint",
+                    "urlTemplate": `${process.env.NEXT_PUBLIC_APP_URL || "https://greenmissionclub.com"}/directory?search={search_term_string}`
+                  },
+                  "query-input": "required name=search_term_string"
+                }
+              })
+            }}
+          />
+        </head>
         <body className={cn(inter.className, "antialiased")}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange={false}
-            storageKey="green-mission-theme"
-          >
+          <ThemeProvider>
             {children}
           </ThemeProvider>
         </body>

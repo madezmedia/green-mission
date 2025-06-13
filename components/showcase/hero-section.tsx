@@ -1,160 +1,134 @@
 "use client"
 
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { ChevronRight, Sparkles, ArrowDown, Play } from "lucide-react"
+import { GMCButton } from "@/components/ui/gmc-button"
+import { ChevronRight, Sparkles, ArrowDown, Leaf } from "lucide-react"
+import { useSettingValue } from "@/lib/hooks/use-cms-content"
 
 export default function HeroSection() {
+  const { value: heroTitle, loading: titleLoading } = useSettingValue("hero_title")
+  const { value: heroDescription, loading: descLoading } = useSettingValue("hero_description")
+  const { value: heroBadgeText, loading: badgeLoading } = useSettingValue("hero_badge_text")
+
+  const displayTitle = heroTitle || "Connect with Eco-Conscious Businesses"
+  const displayDescription = heroDescription || "Join the largest network of sustainable businesses committed to environmental responsibility and business success. Build meaningful connections that drive positive change for our planet."
+  const displayBadgeText = heroBadgeText || "Join 500+ sustainable businesses"
+
   return (
-    <section id="hero" className="relative overflow-hidden bg-gradient-hero py-20 text-white md:py-32 lg:py-40">
-      {/* Enhanced Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <svg className="h-full w-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="hero-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
-              <circle cx="30" cy="30" r="2" fill="white" fillOpacity="0.3" />
-              <circle cx="10" cy="10" r="1" fill="white" fillOpacity="0.2" />
-              <circle cx="50" cy="50" r="1" fill="white" fillOpacity="0.2" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#hero-pattern)" />
-        </svg>
+    <section id="hero" className="relative min-h-screen flex items-center justify-center bg-background text-foreground overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="gmc-geometric-pattern absolute inset-0"></div>
       </div>
 
-      {/* Floating Elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 bg-white/5 rounded-full blur-xl animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-32 h-32 bg-white/5 rounded-full blur-xl animate-pulse delay-1000"></div>
-      <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-white/3 rounded-full blur-lg animate-pulse delay-500"></div>
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10"></div>
 
-      <div className="container relative mx-auto px-4 text-center md:px-6">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-8 flex justify-center animate-fade-in">
-            <div className="flex items-center gap-2 rounded-full bg-white/10 px-6 py-3 text-sm backdrop-blur-sm border border-white/20 transition-all hover:bg-white/15 hover:scale-105">
-              <Sparkles className="h-4 w-4" />
-              <span className="font-medium">Join 500+ sustainable businesses</span>
+      {/* Floating Elements */}
+      <div className="absolute top-20 left-10 w-24 h-24 bg-accent/20 rounded-full blur-xl animate-gmc-pulse"></div>
+      <div className="absolute bottom-20 right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl animate-gmc-pulse delay-1000"></div>
+      <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-secondary/20 rounded-full blur-lg animate-gmc-pulse delay-500"></div>
+
+      {/* Main Content */}
+      <div className="relative z-10 container mx-auto px-4 text-center">
+        <div className="max-w-5xl mx-auto space-y-8">
+          
+          {/* Badge */}
+          <div className="flex justify-center animate-gmc-fade-in">
+            <div className="inline-flex items-center gap-2 rounded-full bg-muted border border-border px-6 py-3 text-sm font-medium gmc-transition hover:bg-accent/50">
+              <Leaf className="h-4 w-4 text-primary" />
+              <span className="text-muted-foreground">
+                {badgeLoading ? "Loading..." : displayBadgeText}
+              </span>
             </div>
           </div>
 
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl animate-fade-in-up">
-            Connect with{" "}
-            <span className="relative">
-              <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-                Eco-Conscious
-              </span>
-              <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-white/50 to-transparent rounded-full animate-pulse"></div>
-            </span>{" "}
-            Businesses
-          </h1>
+          {/* Main Heading */}
+          <div className="space-y-4 animate-gmc-fade-in delay-200">
+            <h1 className="gmc-heading-xl text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
+              {titleLoading ? (
+                "Loading..."
+              ) : (
+                <>
+                  Connect with{" "}
+                  <span className="relative inline-block">
+                    <span className="text-primary">Eco-Conscious</span>
+                    <div className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent rounded-full"></div>
+                  </span>{" "}
+                  Businesses
+                </>
+              )}
+            </h1>
+          </div>
 
-          <p className="mx-auto mt-8 max-w-3xl text-lg text-white/90 md:text-xl lg:text-2xl leading-relaxed animate-fade-in-up delay-200">
-            Join the largest network of sustainable businesses committed to environmental responsibility and business
-            success. Build meaningful connections that drive positive change for our planet.
-          </p>
+          {/* Description */}
+          <div className="animate-gmc-fade-in delay-400">
+            <p className="gmc-body-lg max-w-3xl mx-auto text-muted-foreground leading-relaxed">
+              {descLoading ? "Loading..." : displayDescription}
+            </p>
+          </div>
 
-          <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row animate-fade-in-up delay-400">
-            <Button
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-gmc-fade-in delay-600">
+            <GMCButton
+              variant="gmc-primary"
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 shadow-xl hover:shadow-2xl transition-all hover:scale-105 px-8 py-6 text-lg font-semibold group"
+              className="group gmc-hover-lift"
+              asChild
+            >
+              <Link href="/join">
+                Join Network
+                <Sparkles className="ml-2 h-5 w-5 group-hover:rotate-12 gmc-transition" />
+              </Link>
+            </GMCButton>
+            
+            <GMCButton
+              variant="gmc-outline"
+              size="lg"
+              className="group gmc-hover-lift"
               asChild
             >
               <Link href="/directory">
                 Explore Directory
-                <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 gmc-transition" />
               </Link>
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-white/30 text-white hover:bg-white/10 hover:text-white backdrop-blur-sm hover:border-white/50 transition-all px-8 py-6 text-lg font-semibold group"
-              asChild
-            >
-              <Link href="/sign-up">
-                Join Network
-                <Sparkles className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform" />
-              </Link>
-            </Button>
+            </GMCButton>
           </div>
 
-          <div className="mt-16 flex justify-center items-center gap-6 animate-fade-in-up delay-600">
-            <Button
-              variant="ghost"
+          {/* Scroll Indicator */}
+          <div className="flex justify-center pt-8 animate-gmc-fade-in delay-800">
+            <GMCButton
+              variant="gmc-minimal"
               size="sm"
-              className="text-white/70 hover:text-white transition-all group"
+              className="group text-muted-foreground hover:text-foreground"
               onClick={() => document.getElementById("features")?.scrollIntoView({ behavior: "smooth" })}
             >
-              <ArrowDown className="h-5 w-5 group-hover:translate-y-1 transition-transform animate-bounce" />
+              <ArrowDown className="h-4 w-4 group-hover:translate-y-1 gmc-transition animate-bounce" />
               <span className="ml-2">Discover Features</span>
-            </Button>
-
-            <div className="hidden sm:flex items-center gap-2 text-white/60 text-sm">
-              <Play className="h-4 w-4" />
-              <span>Watch Demo</span>
-            </div>
+            </GMCButton>
           </div>
 
-          {/* Trust indicators */}
-          <div className="mt-16 flex flex-wrap justify-center items-center gap-8 text-white/60 text-sm animate-fade-in-up delay-800">
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap justify-center items-center gap-8 pt-8 text-sm text-muted-foreground animate-gmc-fade-in delay-1000">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-gmc-pulse"></div>
               <span>500+ Active Members</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-300"></div>
+              <div className="w-2 h-2 bg-secondary rounded-full animate-gmc-pulse delay-300"></div>
               <span>25+ Industries</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-600"></div>
+              <div className="w-2 h-2 bg-accent rounded-full animate-gmc-pulse delay-600"></div>
               <span>95% Satisfaction Rate</span>
             </div>
           </div>
+
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        
-        @keyframes fade-in-up {
-          from { 
-            opacity: 0; 
-            transform: translateY(30px); 
-          }
-          to { 
-            opacity: 1; 
-            transform: translateY(0); 
-          }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 1s ease-out;
-        }
-        
-        .animate-fade-in-up {
-          animation: fade-in-up 1s ease-out;
-        }
-        
-        .delay-200 {
-          animation-delay: 0.2s;
-          animation-fill-mode: both;
-        }
-        
-        .delay-400 {
-          animation-delay: 0.4s;
-          animation-fill-mode: both;
-        }
-        
-        .delay-600 {
-          animation-delay: 0.6s;
-          animation-fill-mode: both;
-        }
-        
-        .delay-800 {
-          animation-delay: 0.8s;
-          animation-fill-mode: both;
-        }
-      `}</style>
+      {/* Bottom Fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent"></div>
     </section>
   )
 }

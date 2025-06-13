@@ -2,86 +2,305 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+  font-variation-settings: 'opsz' 32;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* GMC Brand Utilities */
+  .gmc-geometric-pattern {
+    background-image:
+      linear-gradient(135deg, transparent 25%, hsl(var(--accent)) 25%, hsl(var(--accent)) 50%, transparent 50%),
+      linear-gradient(45deg, transparent 25%, hsl(var(--muted)) 25%, hsl(var(--muted)) 50%, transparent 50%);
+    background-size: 40px 40px;
+    opacity: 0.3;
+  }
+  
+  .gmc-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .gmc-hover-lift:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Logo Adaptive Styling for Theme Compatibility */
+  .gmc-logo-adaptive {
+    filter: brightness(1) contrast(1) saturate(1);
+    transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Dark mode logo adjustments */
+  .dark .gmc-logo-adaptive {
+    filter: brightness(1.1) contrast(0.95) saturate(1.05);
+  }
+  
+  /* Forest theme logo adjustments */
+  .gmc-forest-light .gmc-logo-adaptive {
+    filter: brightness(1) contrast(1.05) saturate(1.1);
+  }
+  
+  .gmc-forest-dark .gmc-logo-adaptive {
+    filter: brightness(1.15) contrast(0.9) saturate(1.1) hue-rotate(-2deg);
+  }
+  
+  /* Ocean theme logo adjustments */
+  .gmc-ocean-light .gmc-logo-adaptive {
+    filter: brightness(1.02) contrast(1.08) saturate(1.15) hue-rotate(2deg);
+  }
+  
+  .gmc-ocean-dark .gmc-logo-adaptive {
+    filter: brightness(1.2) contrast(0.85) saturate(1.2) hue-rotate(5deg);
+  }
+  
+  /* Earth theme logo adjustments */
+  .gmc-earth-light .gmc-logo-adaptive {
+    filter: brightness(1.05) contrast(1.1) saturate(1.2) hue-rotate(-5deg);
+  }
+  
+  .gmc-earth-dark .gmc-logo-adaptive {
+    filter: brightness(1.25) contrast(0.8) saturate(1.25) hue-rotate(-8deg);
+  }
+  
+  /* Sunset theme logo adjustments */
+  .gmc-sunset-light .gmc-logo-adaptive {
+    filter: brightness(1.08) contrast(1.12) saturate(1.25) hue-rotate(-3deg);
+  }
+  
+  .gmc-sunset-dark .gmc-logo-adaptive {
+    filter: brightness(1.3) contrast(0.75) saturate(1.3) hue-rotate(-10deg);
+  }
+  
+  /* Logo hover effects for better interactivity */
+  .gmc-logo-adaptive:hover {
+    filter: brightness(1.1) contrast(1.05) saturate(1.1);
+    transform: scale(1.02);
+  }
+  
+  /* Ensure logo maintains aspect ratio and quality */
+  .gmc-logo-adaptive {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+  }
 }
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-  .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+/* Default CSS variables on root */
+:root {
+  --background: 30 20% 95%;   /* Default to forest light */
+  --foreground: 150 25% 23%;
+  --card: 0 0% 100%;
+  --card-foreground: 150 25% 23%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 150 25% 23%;
+  --primary: 150 25% 23%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 150 22% 57%;
+  --secondary-foreground: 150 25% 23%;
+  --muted: 30 15% 95%;
+  --muted-foreground: 150 18% 35%;
+  --accent: 150 19% 72%;
+  --accent-foreground: 150 25% 23%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 150 13% 81%;
+  --input: 150 13% 81%;
+  --ring: 150 25% 23%;
+  --radius: 0.75rem;
+}
+
+/* GMC Theme Variables - High specificity for theme switching */
+:root.gmc-forest-light {
+  --background: 30 25% 98%;   /* #faf9f7 - Warmer, lighter cream */
+  --foreground: 150 45% 12%;  /* #0f1f15 - Much darker forest green */
+  --card: 0 0% 100%;          /* #ffffff */
+  --card-foreground: 150 45% 12%; /* #0f1f15 - Much darker forest green */
+  --popover: 0 0% 100%;       /* #ffffff */
+  --popover-foreground: 150 45% 12%; /* #0f1f15 - Much darker forest green */
+  --primary: 150 60% 25%;     /* #1a4d2e - Vibrant forest green */
+  --primary-foreground: 0 0% 100%; /* #ffffff */
+  --secondary: 150 45% 55%;   /* #4d8c63 - Vibrant sage green */
+  --secondary-foreground: 0 0% 100%; /* #ffffff */
+  --muted: 150 20% 94%;       /* #eef5f0 - Light mint background */
+  --muted-foreground: 150 35% 35%; /* #3d6b4a - Rich forest medium */
+  --accent: 120 40% 70%;      /* #7db88a - Bright mint accent */
+  --accent-foreground: 150 45% 12%; /* #0f1f15 - Dark contrast */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 150 25% 80%;      /* #c1d4c7 - Visible mint border */
+  --input: 150 25% 80%;       /* #c1d4c7 - Visible mint input */
+  --ring: 150 60% 25%;        /* #1a4d2e - Vibrant ring */
+  --radius: 0.75rem;
+}
+
+:root.gmc-forest-dark {
+  --background: 150 31% 5%;       /* #0a1109 */
+  --foreground: 30 20% 95%;       /* #f8f6f3 */
+  --card: 150 26% 11%;           /* #142218 */
+  --card-foreground: 30 20% 95%; /* #f8f6f3 */
+  --popover: 150 26% 11%;        /* #142218 */
+  --popover-foreground: 30 20% 95%; /* #f8f6f3 */
+  --primary: 150 22% 57%;        /* #7ba688 */
+  --primary-foreground: 150 31% 5%; /* #0a1109 */
+  --secondary: 150 25% 16%;      /* #1f3329 */
+  --secondary-foreground: 30 20% 95%; /* #f8f6f3 */
+  --muted: 150 25% 16%;          /* #1f3329 */
+  --muted-foreground: 150 19% 72%; /* #a8c8b3 */
+  --accent: 150 25% 23%;         /* #2d4a3a */
+  --accent-foreground: 30 20% 95%; /* #f8f6f3 */
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 150 25% 16%;         /* #1f3329 */
+  --input: 150 25% 16%;          /* #1f3329 */
+  --ring: 150 22% 57%;           /* #7ba688 */
+  --radius: 0.75rem;
+}
+
+:root.gmc-ocean-light {
+  --background: 200 30% 98%;      /* #f7fbff - Cool ocean mist */
+  --foreground: 210 70% 15%;      /* #0a1f3d - Deep navy blue */
+  --card: 0 0% 100%;             /* #ffffff */
+  --card-foreground: 210 70% 15%; /* #0a1f3d - Deep navy blue */
+  --popover: 0 0% 100%;          /* #ffffff */
+  --popover-foreground: 210 70% 15%; /* #0a1f3d - Deep navy blue */
+  --primary: 200 85% 35%;        /* #1a66cc - Vibrant ocean blue */
+  --primary-foreground: 0 0% 100%; /* #ffffff */
+  --secondary: 190 60% 50%;      /* #3399cc - Bright cyan blue */
+  --secondary-foreground: 0 0% 100%; /* #ffffff */
+  --muted: 200 25% 94%;          /* #e6f3ff - Light ocean background */
+  --muted-foreground: 210 50% 35%; /* #336699 - Rich ocean medium */
+  --accent: 180 55% 65%;         /* #52b3d9 - Bright aqua accent */
+  --accent-foreground: 210 70% 15%; /* #0a1f3d - Dark contrast */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 200 30% 80%;         /* #b3d9f2 - Visible ocean border */
+  --input: 200 30% 80%;          /* #b3d9f2 - Visible ocean input */
+  --ring: 200 85% 35%;           /* #1a66cc - Vibrant ring */
+  --radius: 0.75rem;
+}
+
+:root.gmc-ocean-dark {
+  --background: 210 60% 8%;       /* #0d1a33 - Deep navy ocean */
+  --foreground: 180 40% 92%;      /* #e0f2f7 - Bright cyan cream */
+  --card: 210 50% 15%;           /* #1a2e52 - Elevated navy cards */
+  --card-foreground: 180 40% 92%; /* #e0f2f7 - Bright cyan cream */
+  --popover: 210 50% 15%;        /* #1a2e52 - Elevated navy */
+  --popover-foreground: 180 40% 92%; /* #e0f2f7 - Bright cyan cream */
+  --primary: 180 70% 60%;        /* #33ccff - Electric cyan */
+  --primary-foreground: 210 60% 8%; /* #0d1a33 - Deep navy */
+  --secondary: 200 55% 45%;      /* #3d8cb8 - Rich ocean blue */
+  --secondary-foreground: 180 40% 92%; /* #e0f2f7 - Bright cyan cream */
+  --muted: 210 40% 18%;          /* #243347 - Elevated muted */
+  --muted-foreground: 180 30% 75%; /* #99d6e6 - Soft cyan */
+  --accent: 160 60% 55%;         /* #33ccb8 - Bright teal accent */
+  --accent-foreground: 210 60% 8%; /* #0d1a33 - Deep navy */
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 210 40% 25%;         /* #2e4766 - Visible border */
+  --input: 210 40% 25%;          /* #2e4766 - Visible input */
+  --ring: 180 70% 60%;           /* #33ccff - Electric ring */
+  --radius: 0.75rem;
+}
+
+:root.gmc-earth-light {
+  --background: 35 25% 98%;       /* #faf8f5 - Warm earth cream */
+  --foreground: 25 60% 15%;       /* #3d2612 - Rich earth brown */
+  --card: 0 0% 100%;             /* #ffffff */
+  --card-foreground: 25 60% 15%;  /* #3d2612 - Rich earth brown */
+  --popover: 0 0% 100%;          /* #ffffff */
+  --popover-foreground: 25 60% 15%; /* #3d2612 - Rich earth brown */
+  --primary: 25 75% 35%;         /* #b8661a - Vibrant earth orange */
+  --primary-foreground: 0 0% 100%; /* #ffffff */
+  --secondary: 35 65% 50%;       /* #cc8533 - Warm golden brown */
+  --secondary-foreground: 0 0% 100%; /* #ffffff */
+  --muted: 35 20% 94%;           /* #f0ebe6 - Warm earth background */
+  --muted-foreground: 25 45% 35%; /* #7a4d26 - Rich earth medium */
+  --accent: 45 70% 65%;          /* #e6b366 - Bright golden accent */
+  --accent-foreground: 25 60% 15%; /* #3d2612 - Dark contrast */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 35 25% 80%;          /* #d4c7b8 - Visible earth border */
+  --input: 35 25% 80%;           /* #d4c7b8 - Visible earth input */
+  --ring: 25 75% 35%;            /* #b8661a - Vibrant ring */
+  --radius: 0.75rem;
+}
+
+:root.gmc-earth-dark {
+  --background: 25 50% 8%;        /* #1f1408 - Rich dark earth */
+  --foreground: 45 35% 92%;       /* #f2ede0 - Warm cream */
+  --card: 25 45% 15%;            /* #3d2612 - Elevated earth cards */
+  --card-foreground: 45 35% 92%; /* #f2ede0 - Warm cream */
+  --popover: 25 45% 15%;         /* #3d2612 - Elevated earth */
+  --popover-foreground: 45 35% 92%; /* #f2ede0 - Warm cream */
+  --primary: 45 65% 60%;         /* #e6b366 - Bright golden */
+  --primary-foreground: 25 50% 8%; /* #1f1408 - Dark earth */
+  --secondary: 35 55% 40%;       /* #b8661a - Rich amber */
+  --secondary-foreground: 45 35% 92%; /* #f2ede0 - Warm cream */
+  --muted: 25 40% 18%;           /* #4d3319 - Elevated muted */
+  --muted-foreground: 45 30% 75%; /* #d9c7a3 - Soft golden */
+  --accent: 55 60% 55%;          /* #ccb366 - Bright lime-gold accent */
+  --accent-foreground: 25 50% 8%; /* #1f1408 - Dark earth */
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 25 40% 25%;          /* #664d33 - Visible border */
+  --input: 25 40% 25%;           /* #664d33 - Visible input */
+  --ring: 45 65% 60%;            /* #e6b366 - Bright ring */
+  --radius: 0.75rem;
+}
+
+:root.gmc-sunset-light {
+  --background: 20 30% 98%;       /* #faf7f5 - Warm sunset cream */
+  --foreground: 10 70% 15%;       /* #4d1f0a - Deep sunset brown */
+  --card: 0 0% 100%;             /* #ffffff */
+  --card-foreground: 10 70% 15%;  /* #4d1f0a - Deep sunset brown */
+  --popover: 0 0% 100%;          /* #ffffff */
+  --popover-foreground: 10 70% 15%; /* #4d1f0a - Deep sunset brown */
+  --primary: 15 85% 45%;         /* #e6661a - Vibrant sunset orange */
+  --primary-foreground: 0 0% 100%; /* #ffffff */
+  --secondary: 25 75% 55%;       /* #e68533 - Warm coral orange */
+  --secondary-foreground: 0 0% 100%; /* #ffffff */
+  --muted: 20 25% 94%;           /* #f0e6e0 - Warm sunset background */
+  --muted-foreground: 10 55% 35%; /* #8c4d26 - Rich sunset medium */
+  --accent: 35 80% 65%;          /* #f2a366 - Bright peach accent */
+  --accent-foreground: 10 70% 15%; /* #4d1f0a - Dark contrast */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 20 30% 80%;          /* #d9c7b8 - Visible sunset border */
+  --input: 20 30% 80%;           /* #d9c7b8 - Visible sunset input */
+  --ring: 15 85% 45%;            /* #e6661a - Vibrant ring */
+  --radius: 0.75rem;
+}
+
+:root.gmc-sunset-dark {
+  --background: 10 60% 8%;        /* #1f0f05 - Deep sunset brown */
+  --foreground: 35 40% 92%;       /* #f2e6d9 - Warm peach cream */
+  --card: 10 55% 15%;            /* #4d1f0a - Elevated sunset cards */
+  --card-foreground: 35 40% 92%; /* #f2e6d9 - Warm peach cream */
+  --popover: 10 55% 15%;         /* #4d1f0a - Elevated sunset */
+  --popover-foreground: 35 40% 92%; /* #f2e6d9 - Warm peach cream */
+  --primary: 25 75% 65%;         /* #f2a366 - Bright coral */
+  --primary-foreground: 10 60% 8%; /* #1f0f05 - Deep sunset */
+  --secondary: 15 65% 45%;       /* #e6661a - Rich sunset orange */
+  --secondary-foreground: 35 40% 92%; /* #f2e6d9 - Warm peach cream */
+  --muted: 10 50% 18%;           /* #4d2612 - Elevated muted */
+  --muted-foreground: 35 35% 75%; /* #d9b8a3 - Soft peach */
+  --accent: 45 70% 60%;          /* #f2cc66 - Bright yellow accent */
+  --accent-foreground: 10 60% 8%; /* #1f0f05 - Deep sunset */
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 10 50% 25%;          /* #664026 - Visible border */
+  --input: 10 50% 25%;           /* #664026 - Visible input */
+  --ring: 25 75% 65%;            /* #f2a366 - Bright ring */
+  --radius: 0.75rem;
 }
 
 @layer base {
@@ -89,6 +308,59 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground gmc-transition;
+  }
+  
+  /* GMC Typography Hierarchy - Enhanced for Brand Consistency */
+  .gmc-heading-xl {
+    @apply text-5xl font-bold leading-none tracking-tight text-foreground;
+    font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+  }
+  .gmc-heading-lg {
+    @apply text-4xl font-semibold leading-tight tracking-tight text-foreground;
+    font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+  }
+  .gmc-heading-md {
+    @apply text-3xl font-semibold leading-tight text-foreground;
+    font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+  }
+  .gmc-heading-sm {
+    @apply text-2xl font-semibold leading-tight text-foreground;
+    font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+  }
+  .gmc-heading-xs {
+    @apply text-xl font-semibold leading-snug text-foreground;
+    font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+  }
+  
+  .gmc-body-lg {
+    @apply text-lg leading-relaxed text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .gmc-body-md {
+    @apply text-base leading-relaxed text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .gmc-body-sm {
+    @apply text-sm leading-normal text-muted-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .gmc-body-xs {
+    @apply text-xs leading-normal text-muted-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  /* GMC Brand-specific text utilities */
+  .gmc-text-primary {
+    @apply text-primary;
+  }
+  .gmc-text-secondary {
+    @apply text-secondary-foreground;
+  }
+  .gmc-text-accent {
+    @apply text-accent-foreground;
+  }
+  .gmc-text-muted {
+    @apply text-muted-foreground;
   }
 }

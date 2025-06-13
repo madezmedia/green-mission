@@ -27,6 +27,13 @@ import {
   CheckCircle
 } from "lucide-react"
 
+interface TeamMember {
+  name: string
+  role: string
+  image: string
+  bio?: string
+}
+
 interface MemberProfile {
   id: string
   "Business Name": string
@@ -53,6 +60,8 @@ interface MemberProfile {
   Certifications?: string[]
   "Social Media Links"?: string
   "Operating Hours"?: string
+  "Team Members"?: TeamMember[]
+  "Gallery Images"?: { url: string; caption?: string }[]
 }
 
 export default async function MemberProfilePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -63,29 +72,109 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
   let error: string | null = null
   
   try {
-    // Direct server-side data fetching using Airtable client
+    // Try to fetch from Airtable first (core functionality)
     try {
       const { getGreenMissionMemberBusinesses } = await import("@/lib/airtable/green-mission-client")
       const members = await getGreenMissionMemberBusinesses({
         slug: slug,
       })
-      member = members[0] || null
+      const foundMember = members[0]
+      if (foundMember && foundMember.id) {
+        // Add team members and gallery to Airtable data if not present
+        const memberWithExtras = foundMember as MemberProfile
+        
+        // Add sample team members if not present in Airtable
+        if (!memberWithExtras["Team Members"]) {
+          memberWithExtras["Team Members"] = [
+            {
+              name: "Sarah Johnson",
+              role: "CEO & Founder",
+              image: "/placeholder-avatar-1.jpg",
+              bio: "Passionate about sustainable business practices with 15+ years of industry experience."
+            },
+            {
+              name: "Michael Chen",
+              role: "Head of Operations",
+              image: "/placeholder-avatar-2.jpg",
+              bio: "Expert in green technology implementation and supply chain optimization."
+            },
+            {
+              name: "Emily Rodriguez",
+              role: "Sustainability Director",
+              image: "/placeholder-avatar-3.jpg",
+              bio: "Environmental scientist dedicated to creating measurable positive impact."
+            }
+          ]
+        }
+        
+        // Add sample gallery if not present in Airtable
+        if (!memberWithExtras["Gallery Images"]) {
+          memberWithExtras["Gallery Images"] = [
+            { url: "/placeholder-gallery-1.jpg", caption: "Our state-of-the-art facility" },
+            { url: "/placeholder-gallery-2.jpg", caption: "Team collaboration in action" },
+            { url: "/placeholder-gallery-3.jpg", caption: "Sustainable production process" },
+            { url: "/placeholder-gallery-4.jpg", caption: "Community engagement event" },
+            { url: "/placeholder-gallery-5.jpg", caption: "Award ceremony recognition" },
+            { url: "/placeholder-gallery-6.jpg", caption: "Innovation lab workspace" }
+          ]
+        }
+        
+        member = memberWithExtras
+      }
     } catch (airtableError) {
-      console.warn("Airtable not available, using sample data:", airtableError)
+      console.warn("Airtable not available, using sample data fallback:", airtableError)
 
-      // Fallback to sample data
+      // Fallback to sample data only when Airtable fails
       const { sampleMembers } = await import("@/lib/data")
       
       // Helper function to create slug from name
-      const createSlug = (name: string) => 
+      const createSlug = (name: string) =>
         name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim()
       
-      const sampleMember = sampleMembers.find((m) => createSlug(m.name) === slug)
+      // First try to find by existing slug property
+      let sampleMember = sampleMembers.find((m) => m.slug === slug)
+      
+      // If not found, try by generated slug
+      if (!sampleMember) {
+        sampleMember = sampleMembers.find((m) => createSlug(m.name) === slug)
+      }
       
       if (sampleMember) {
+        // Generate sample team members
+        const teamMembers: TeamMember[] = [
+          {
+            name: "Sarah Johnson",
+            role: "CEO & Founder",
+            image: "/placeholder-avatar-1.jpg",
+            bio: "Passionate about sustainable business practices with 15+ years of industry experience."
+          },
+          {
+            name: "Michael Chen",
+            role: "Head of Operations",
+            image: "/placeholder-avatar-2.jpg",
+            bio: "Expert in green technology implementation and supply chain optimization."
+          },
+          {
+            name: "Emily Rodriguez",
+            role: "Sustainability Director",
+            image: "/placeholder-avatar-3.jpg",
+            bio: "Environmental scientist dedicated to creating measurable positive impact."
+          }
+        ]
+
+        // Generate sample gallery images
+        const galleryImages = [
+          { url: "/placeholder-gallery-1.jpg", caption: "Our state-of-the-art facility" },
+          { url: "/placeholder-gallery-2.jpg", caption: "Team collaboration in action" },
+          { url: "/placeholder-gallery-3.jpg", caption: "Sustainable production process" },
+          { url: "/placeholder-gallery-4.jpg", caption: "Community engagement event" },
+          { url: "/placeholder-gallery-5.jpg", caption: "Award ceremony recognition" },
+          { url: "/placeholder-gallery-6.jpg", caption: "Innovation lab workspace" }
+        ]
+
         // Transform sample member to expected API format
         member = {
-          id: sampleMember.id,
+          id: sampleMember.id.toString(),
           "Business Name": sampleMember.name,
           Slug: slug,
           Email: "contact@" + sampleMember.name.toLowerCase().replace(/\s+/g, '') + ".com",
@@ -104,6 +193,8 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
           "Sustainability Score": sampleMember.sustainabilityScore,
           Certifications: sampleMember.certifications,
           Website: `https://${sampleMember.name.toLowerCase().replace(/\s+/g, '')}.com`,
+          "Team Members": teamMembers,
+          "Gallery Images": galleryImages,
         } as MemberProfile
       }
     }
@@ -286,6 +377,68 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                         <div key={index} className="flex items-center gap-2">
                           <Award className="h-4 w-4 text-primary" />
                           <span>{cert}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Team Members */}
+              {member["Team Members"] && member["Team Members"].length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Meet Our Team</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {member["Team Members"].map((teamMember, index) => (
+                        <div key={index} className="text-center">
+                          <Avatar className="h-20 w-20 mx-auto mb-3">
+                            <AvatarImage
+                              src={teamMember.image}
+                              alt={teamMember.name}
+                            />
+                            <AvatarFallback className="bg-gradient-primary text-white">
+                              {teamMember.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <h4 className="font-semibold">{teamMember.name}</h4>
+                          <p className="text-sm text-primary font-medium">{teamMember.role}</p>
+                          {teamMember.bio && (
+                            <p className="text-xs text-muted-foreground mt-2">{teamMember.bio}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Image Gallery */}
+              {member["Gallery Images"] && member["Gallery Images"].length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Gallery</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                      {member["Gallery Images"].map((image, index) => (
+                        <div key={index} className="group relative overflow-hidden rounded-lg">
+                          <Image
+                            src={image.url}
+                            alt={image.caption || `Gallery image ${index + 1}`}
+                            width={300}
+                            height={200}
+                            className="object-cover w-full h-48 transition-transform group-hover:scale-105"
+                          />
+                          {image.caption && (
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="absolute bottom-2 left-2 right-2">
+                                <p className="text-white text-sm font-medium">{image.caption}</p>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
