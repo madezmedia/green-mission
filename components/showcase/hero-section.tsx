@@ -2,17 +2,15 @@
 
 import Link from "next/link"
 import { GMCButton } from "@/components/ui/gmc-button"
-import { ChevronRight, Sparkles, ArrowDown, Leaf } from "lucide-react"
+import { ChevronRight, Sparkles, ArrowDown } from "lucide-react"
 import { useSettingValue } from "@/lib/hooks/use-cms-content"
 
 export default function HeroSection() {
   const { value: heroTitle, loading: titleLoading } = useSettingValue("hero_title")
   const { value: heroDescription, loading: descLoading } = useSettingValue("hero_description")
-  const { value: heroBadgeText, loading: badgeLoading } = useSettingValue("hero_badge_text")
 
   const displayTitle = heroTitle || "Connect with Eco-Conscious Businesses"
   const displayDescription = heroDescription || "Join the largest network of sustainable businesses committed to environmental responsibility and business success. Build meaningful connections that drive positive change for our planet."
-  const displayBadgeText = heroBadgeText || "Join 500+ sustainable businesses"
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center justify-center bg-background text-foreground overflow-hidden">
@@ -33,16 +31,6 @@ export default function HeroSection() {
       <div className="relative z-10 container mx-auto px-4 text-center">
         <div className="max-w-5xl mx-auto space-y-8">
           
-          {/* Badge */}
-          <div className="flex justify-center animate-gmc-fade-in">
-            <div className="inline-flex items-center gap-2 rounded-full bg-muted border border-border px-6 py-3 text-sm font-medium gmc-transition hover:bg-accent/50">
-              <Leaf className="h-4 w-4 text-primary" />
-              <span className="text-muted-foreground">
-                {badgeLoading ? "Loading..." : displayBadgeText}
-              </span>
-            </div>
-          </div>
-
           {/* Main Heading */}
           <div className="space-y-4 animate-gmc-fade-in delay-200">
             <h1 className="gmc-heading-xl text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
