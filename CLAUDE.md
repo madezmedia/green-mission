@@ -14,14 +14,15 @@ Green Mission is a Next.js membership directory platform for eco-conscious busin
 
 ```bash
 # Development
-pnpm dev          # Start development server
+pnpm dev          # Start development server (http://localhost:3000)
 pnpm build        # Build for production
 pnpm start        # Start production server
 pnpm lint         # Run ESLint
 
-# Setup Scripts
+# Setup Scripts (requires tsx installed globally: npm i -g tsx)
 tsx scripts/setup-green-mission-airtable.ts    # Interactive Airtable multi-base setup
 tsx scripts/seed-airtable.ts                   # Seed Airtable with sample data
+tsx scripts/setup-stripe-payment-links.ts     # Setup Stripe payment links
 
 # Business ID Generation Scripts
 pnpm generate-business-ids        # Generate business IDs for existing records
@@ -29,6 +30,7 @@ pnpm generate-business-ids:check  # Check/validate business ID generation
 
 # Package manager: pnpm (not npm/yarn)
 # Note: No test framework configured
+# Build ignores ESLint and TypeScript errors (next.config.mjs)
 ```
 
 ## Architecture
@@ -57,27 +59,32 @@ pnpm generate-business-ids:check  # Check/validate business ID generation
 - **Theme Provider**: Custom theme switching with Green Mission branding
 
 ### Key Files
-- `lib/airtable/green-mission-client.ts`: All Airtable data access functions
+- `lib/airtable/green-mission-client.ts`: All Airtable data access functions with multi-base support
 - `lib/data.ts`: Static/mock data and data transformations
 - `lib/organization-management.ts`: Organization and business listing management
 - `lib/clerk-airtable-sync.ts`: Clerk-Airtable user synchronization
 - `lib/business-id-generator.ts`: Unique business ID generation utility
 - `types/index.ts`: TypeScript interfaces for Member and Category types
-- `components/theme-provider.tsx`: Theme context provider
-- `styles/globals.css`: Custom CSS variables for Green Mission theming
+- `components/layout/theme-provider.tsx`: Theme context provider
+- `app/globals.css`: Custom CSS variables for Green Mission theming
+- `middleware.ts`: Clerk authentication middleware
+- `next.config.mjs`: Build configuration (ignores TypeScript/ESLint errors, unoptimized images)
+- `.env.example`: Environment variable template with all required services
 
 ## Technology Stack
 
 - **Framework**: Next.js 15 with App Router
 - **Styling**: Tailwind CSS with custom Green Mission theme variables
 - **UI Library**: Radix UI components (shadcn/ui)
-- **Database**: Airtable (multi-base setup)
-- **Authentication**: Clerk
-- **Payments**: Stripe with subscription management
+- **Database**: Airtable (multi-base setup: CMS, Directory, Branding)
+- **Authentication**: Clerk with organization support
+- **Payments**: Stripe with subscription management and pricing tables
 - **Cache**: Upstash Redis (optional)
-- **Theme**: next-themes with custom light/dark themes
-- **State**: React hooks, no global state management
-- **TypeScript**: Strict mode enabled
+- **Theme**: next-themes with custom light/dark themes and CSS variables
+- **State**: React hooks, no global state management (React Context for themes)
+- **TypeScript**: Strict mode enabled with path mapping (@/* imports)
+- **Validation**: Zod for runtime type checking
+- **Forms**: React Hook Form with Zod resolvers
 
 ## Deployment & Integration
 
@@ -228,10 +235,13 @@ Copy `.env.example` to `.env.local` and configure:
 ## Important Notes
 
 - Build ignores ESLint and TypeScript errors (`next.config.mjs`)
-- Images are unoptimized for deployment flexibility
+- Images are unoptimized for deployment flexibility (`next.config.mjs`)
 - Client-side navigation state in app layout
 - Airtable field names use exact case from Airtable (e.g., "Business Name", "Featured Member")
 - Theme switching uses CSS custom properties with `hsl(var(--color-name))` pattern
 - No test framework configured - tests should be added if comprehensive testing is needed
+- Multi-base Airtable architecture with separate API keys (can share same `AIRTABLE_API_KEY`)
 - **Business Tags Field**: Limited to predefined options in Airtable: "Sustainable", "Local", "B-Corp", "Women-Owned"
 - **Industry Field**: Currently not stored due to Business Tags limitations - needs separate field in future version
+- Path mapping configured: Use `@/` for imports from project root
+- TypeScript strict mode enabled - type safety enforced throughout codebase
