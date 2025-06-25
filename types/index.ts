@@ -18,6 +18,9 @@ export type Member = {
   featured: boolean
   spotlight: boolean
   verified: boolean
+  memberSince: string
+  industryCategory: string
+  greenMissionAlignment?: string
 }
 
 export type Category = {

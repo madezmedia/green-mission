@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Leaf, Mail, Phone, MapPin } from "lucide-react"
+import { Leaf, Mail, Phone, MapPin, Linkedin } from "lucide-react"
 import { usePrimaryLogo } from "@/lib/hooks/use-cms-content"
 import Image from "next/image"
 
@@ -55,6 +55,17 @@ export default function ShowcaseFooter() {
                 <MapPin className="h-4 w-4" />
                 <span>San Francisco, CA</span>
               </div>
+              <div className="flex items-center gap-2">
+                <Linkedin className="h-4 w-4" />
+                <Link
+                  href="https://linkedin.com/company/green-mission-club"
+                  className="hover:text-primary transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Green Mission Club LinkedIn
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -73,18 +84,13 @@ export default function ShowcaseFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/events" className="text-muted-foreground hover:text-primary transition-colors">
-                  Events
-                </Link>
-              </li>
-              <li>
                 <Link href="/blog" className="text-muted-foreground hover:text-primary transition-colors">
                   Blog
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
-                  Contact
+                <Link href="/faq" className="text-muted-foreground hover:text-primary transition-colors">
+                  FAQ
                 </Link>
               </li>
             </ul>
@@ -95,23 +101,23 @@ export default function ShowcaseFooter() {
             <h3 className="mb-4 text-lg font-semibold text-primary">Legal</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/terms-of-service" className="text-muted-foreground hover:text-primary transition-colors">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link href="/cookies" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/cookie-policy" className="text-muted-foreground hover:text-primary transition-colors">
                   Cookie Policy
                 </Link>
               </li>
               <li>
-                <Link href="/support" className="text-muted-foreground hover:text-primary transition-colors">
-                  Support
+                <Link href="/disclaimer" className="text-muted-foreground hover:text-primary transition-colors">
+                  Disclaimer
                 </Link>
               </li>
             </ul>

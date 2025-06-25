@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { GMCButton } from "@/components/ui/gmc-button"
+import { LogoVariation } from "@/components/ui/logo-variation"
 import { ChevronRight, Sparkles, ArrowDown } from "lucide-react"
 import { useSettingValue } from "@/lib/hooks/use-cms-content"
 
@@ -30,6 +31,16 @@ export default function HeroSection() {
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-4 text-center">
         <div className="max-w-5xl mx-auto space-y-8">
+          
+          {/* Logo Variation */}
+          <div className="flex justify-center animate-gmc-fade-in">
+            <LogoVariation
+              variant="bonsai-tree"
+              capitalization="mixed"
+              size="lg"
+              className="home-header-logo"
+            />
+          </div>
           
           {/* Main Heading */}
           <div className="space-y-4 animate-gmc-fade-in delay-200">
@@ -96,21 +107,6 @@ export default function HeroSection() {
             </GMCButton>
           </div>
 
-          {/* Trust Indicators */}
-          <div className="flex flex-wrap justify-center items-center gap-8 pt-8 text-sm text-muted-foreground animate-gmc-fade-in delay-1000">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full animate-gmc-pulse"></div>
-              <span>500+ Active Members</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-secondary rounded-full animate-gmc-pulse delay-300"></div>
-              <span>25+ Industries</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-accent rounded-full animate-gmc-pulse delay-600"></div>
-              <span>95% Satisfaction Rate</span>
-            </div>
-          </div>
 
         </div>
       </div>

@@ -1,7 +1,7 @@
 import Stripe from "stripe"
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
+  apiVersion: "2025-05-28.basil",
   typescript: true,
 })
 
@@ -89,7 +89,11 @@ export class StripeHelpers {
     priceId: string
     metadata?: Record<string, string>
   }) {
-    return stripe.paymentLinks.create({
+    // Check if this is a recurring price to determine customer creation setting
+    const price = await stripe.prices.retrieve(priceId)
+    const isRecurring = !!price.recurring
+    
+    const paymentLinkData: any = {
       line_items: [
         {
           price: priceId,
@@ -102,7 +106,6 @@ export class StripeHelpers {
       },
       allow_promotion_codes: true,
       billing_address_collection: "required",
-      customer_creation: "always",
       payment_method_types: ["card"],
       after_completion: {
         type: "redirect",
@@ -110,49 +113,135 @@ export class StripeHelpers {
           url: `${process.env.NEXT_PUBLIC_APP_URL}/success`,
         },
       },
-    })
+    }
+    
+    // Only set customer_creation for non-recurring prices
+    if (!isRecurring) {
+      paymentLinkData.customer_creation = "always"
+    }
+    
+    return stripe.paymentLinks.create(paymentLinkData)
   }
 
   // Get or create payment links for all membership tiers
-  static async getOrCreateMembershipPaymentLinks() {
-    const paymentLinks = await stripe.paymentLinks.list({ active: true })
-    const existingLinks = new Map(paymentLinks.data.map((link) => [link.line_items?.data[0]?.price?.id, link]))
+  static async getOrCreateMembershipPaymentLinks(): Promise<Record<string, any>> {
+    try {
+      // Fetch membership plans from CMS API (same as frontend)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/cms/membership-plans?active=true`)
+      const result = await response.json()
+      
+      if (!result.plans) {
+        throw new Error('Failed to fetch membership plans from CMS')
+      }
+      
+      const membershipPlans = result.plans
+      const paymentLinks = await stripe.paymentLinks.list({ active: true })
+      const existingLinks = new Map(paymentLinks.data.map((link) => [link.line_items?.data[0]?.price?.id, link]))
 
-    const membershipLinks = {}
+      const membershipLinks: Record<string, any> = {}
 
-    for (const [tierKey, tierData] of Object.entries(membershipProducts)) {
-      // Create monthly and yearly payment links if they don't exist
-      const monthlyPriceId = `price_${tierKey}_monthly` // You'll need actual price IDs
-      const yearlyPriceId = `price_${tierKey}_yearly`
+      for (const plan of membershipPlans) {
+        const planId = plan.id
+        const planName = plan.planName?.toLowerCase().replace(/\s+/g, '_') || 'unknown'
+        const monthlyPrice = plan.monthlyPrice
+        
+        if (!planId || !monthlyPrice || !planName) {
+          console.warn(`Skipping plan ${planId} - missing required fields`)
+          continue
+        }
 
-      if (!existingLinks.has(monthlyPriceId)) {
-        const monthlyLink = await this.createPaymentLink({
-          priceId: monthlyPriceId,
-          metadata: {
-            tier: tierKey,
-            billing: "monthly",
-          },
-        })
-        membershipLinks[`${tierKey}_monthly`] = monthlyLink
-      } else {
-        membershipLinks[`${tierKey}_monthly`] = existingLinks.get(monthlyPriceId)
+        // Generate a consistent price ID based on plan ID
+        const stripeMonthlyPriceId = `price_${planName}_monthly`
+
+        // Check if the price exists in Stripe, if not create it
+        let actualPriceId = stripeMonthlyPriceId
+        try {
+          await stripe.prices.retrieve(stripeMonthlyPriceId)
+        } catch (error: any) {
+          if (error?.code === 'resource_missing') {
+            // Create the missing price in Stripe
+            console.log(`Creating missing Stripe price: ${stripeMonthlyPriceId}`)
+            
+            // First, create or get the product
+            const productName = plan.planName
+            const productDescription = plan.planDescription || `${productName} membership`
+            
+            let product
+            try {
+              // Try to find existing product
+              const products = await stripe.products.list({ limit: 100 })
+              product = products.data.find(p => p.name === productName)
+              
+              if (!product) {
+                // Create new product
+                product = await stripe.products.create({
+                  name: productName,
+                  description: productDescription,
+                  metadata: {
+                    plan_id: planId,
+                    plan_name: planName,
+                    source: 'green-mission-cms'
+                  }
+                })
+              }
+            } catch (productError) {
+              console.error(`Error creating product for ${planName}:`, productError)
+              continue
+            }
+
+            // Create the price
+            try {
+              const newPrice = await stripe.prices.create({
+                product: product.id,
+                unit_amount: Math.round(monthlyPrice * 100), // Convert to cents
+                currency: 'usd',
+                recurring: {
+                  interval: 'month'
+                },
+                metadata: {
+                  plan_id: planId,
+                  plan_name: planName,
+                  source: 'green-mission-cms'
+                }
+              })
+              actualPriceId = newPrice.id
+              console.log(`Created Stripe price ${actualPriceId} for ${planName}`)
+            } catch (priceError) {
+              console.error(`Error creating price for ${planName}:`, priceError)
+              continue
+            }
+          } else {
+            console.error(`Error retrieving price ${stripeMonthlyPriceId}:`, error)
+            continue
+          }
+        }
+
+        // Create or get payment link
+        if (!existingLinks.has(actualPriceId)) {
+          try {
+            const paymentLink = await this.createPaymentLink({
+              priceId: actualPriceId,
+              metadata: {
+                plan_id: planId,
+                plan_name: planName,
+                billing: "monthly"
+              },
+            })
+            membershipLinks[`${planId}_monthly`] = paymentLink
+            console.log(`Created payment link for ${planName} with key ${planId}_monthly`)
+          } catch (linkError) {
+            console.error(`Error creating payment link for ${planName}:`, linkError)
+          }
+        } else {
+          membershipLinks[`${planId}_monthly`] = existingLinks.get(actualPriceId)
+        }
       }
 
-      if (!existingLinks.has(yearlyPriceId)) {
-        const yearlyLink = await this.createPaymentLink({
-          priceId: yearlyPriceId,
-          metadata: {
-            tier: tierKey,
-            billing: "yearly",
-          },
-        })
-        membershipLinks[`${tierKey}_yearly`] = yearlyLink
-      } else {
-        membershipLinks[`${tierKey}_yearly`] = existingLinks.get(yearlyPriceId)
-      }
+      return membershipLinks
+    } catch (error) {
+      console.error('Error in getOrCreateMembershipPaymentLinks:', error)
+      throw error
     }
-
-    return membershipLinks
   }
 
   // Create or update a customer

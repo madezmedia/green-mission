@@ -1,10 +1,13 @@
 import Image from "next/image"
 import Link from "next/link"
-import { Leaf, MapPin, Star } from "lucide-react"
+import { MapPin } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { Member } from "@/types" // Use the existing Member type
 import { cn } from "@/lib/utils"
+import MemberTag from "@/components/directory/member-tag"
+import MemberSince from "@/components/directory/member-since"
+import IndustryTag from "@/components/directory/industry-tag"
 
 interface ShowcaseMemberCardProps {
   member: Member
@@ -37,25 +40,26 @@ export default function ShowcaseMemberCard({ member }: ShowcaseMemberCardProps) 
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg font-semibold text-primary">{member.name}</CardTitle>
-            <Badge className={cn(tierColors[member.tier], "text-xs")}>{member.tier}</Badge>
+            <MemberTag
+              type={member.featured ? "Featured Member" : "Member"}
+              color={member.featured ? "green-accent" : "green-base"}
+              icon={member.featured ? "star" : "check"}
+              className="text-xs"
+            />
           </div>
           <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
             <MapPin className="h-3 w-3" />
             <span>{member.location}</span>
           </div>
-          <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-            <Star className="h-3 w-3 fill-accent text-accent" />
-            <span>{member.rating}</span>
-            <div className="ml-auto flex">
-              {[...Array(Math.floor(member.sustainabilityScore / 20))].map(
-                (
-                  _,
-                  i, // Assuming score is 0-100
-                ) => (
-                  <Leaf key={i} className="h-3 w-3 fill-primary text-primary" />
-                ),
-              )}
-            </div>
+          <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
+            <MemberSince
+              date={member.memberSince}
+              format="Month YYYY"
+            />
+            <IndustryTag
+              category={member.industryCategory}
+              position="after-member-since"
+            />
           </div>
         </div>
       </CardHeader>

@@ -209,19 +209,23 @@ export async function getGreenMissionBlogPosts(
     const base = getGreenMissionAirtableBase("cms")
     const table = base("Blog Posts")
 
-    let filterFormula = "AND({Status} = 'Published')"
+    let filterConditions = ["{Status} = 'Published'"]
 
     if (options.featured) {
-      filterFormula += ", {Featured} = TRUE()"
+      filterConditions.push("{Featured} = TRUE()")
     }
 
     if (options.memberOnly !== undefined) {
-      filterFormula += `, {"Member Only"} = ${options.memberOnly ? "TRUE()" : "FALSE()"}`
+      filterConditions.push(`{"Member Only"} = ${options.memberOnly ? "TRUE()" : "FALSE()"}`)
     }
 
     if (options.tierAccess) {
-      filterFormula += `, FIND('${options.tierAccess}', {Tier Access}) > 0`
+      filterConditions.push(`FIND('${options.tierAccess}', {Tier Access}) > 0`)
     }
+
+    const filterFormula = filterConditions.length > 1
+      ? `AND(${filterConditions.join(", ")})`
+      : filterConditions[0]
 
     const records = await table
       .select({

@@ -14,6 +14,7 @@ const navItems = [
   { name: "Directory", href: "/directory" },
   { name: "About", href: "/about" },
   { name: "Membership", href: "/membership" },
+  { name: "Blog", href: "/blog" },
 ]
 
 export default function ShowcaseNavigation() {
@@ -62,9 +63,6 @@ export default function ShowcaseNavigation() {
           <BasicThemeSwitcher />
           <Button asChild>
             <Link href="/dashboard">Member Login</Link>
-          </Button>
-          <Button variant="secondary" asChild>
-            <Link href="/join">Join Now</Link>
           </Button>
         </nav>
 
@@ -119,9 +117,6 @@ export default function ShowcaseNavigation() {
                   <BasicThemeSwitcher />
                   <Button asChild>
                     <Link href="/dashboard">Member Login</Link>
-                  </Button>
-                  <Button variant="secondary" asChild>
-                    <Link href="/join">Join Now</Link>
                   </Button>
                 </div>
               </nav>

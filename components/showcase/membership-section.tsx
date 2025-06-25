@@ -53,7 +53,7 @@ function PlanCard({ plan }: PlanCardProps) {
         </div>
       )}
       
-      <div className="p-6 space-y-6">
+      <div className="p-4 space-y-3">
         {/* Plan Header */}
         <div className="text-center space-y-2">
           <h3 className="text-xl font-bold text-foreground">
@@ -161,11 +161,11 @@ export default function MembershipSection() {
   // Use CMS plans if available, otherwise fallback
   const displayPlans = plans.length > 0 ? plans : fallbackPlans
   
-  // Limit to 3 plans for homepage preview
-  const previewPlans = displayPlans.slice(0, 3)
+  // Limit to 4 plans for homepage preview (updated from 3 to 4)
+  const previewPlans = displayPlans.slice(0, 4)
 
   return (
-    <section id="pricing" className="bg-muted/20 py-16 md:py-24 transition-all duration-500">
+    <section id="pricing" className="bg-muted/20 py-8 md:py-12 transition-all duration-500">
       <div className="container mx-auto px-4 md:px-6">
         <div className="mb-16 text-center">
           <h2 className="text-3xl font-bold text-primary md:text-4xl mb-4">
@@ -197,7 +197,7 @@ export default function MembershipSection() {
             </GMCButton>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-7xl mx-auto">
             {previewPlans.map((plan) => (
               <PlanCard key={plan.id} plan={plan} />
             ))}

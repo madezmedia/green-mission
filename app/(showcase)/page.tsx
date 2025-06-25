@@ -15,13 +15,15 @@ export default function ShowcasePage() {
       <ShowcaseNavigation />
       <main>
         <HeroSection />
-        <StatsSection />
         <FeaturesSection />
         <FeaturedMembersSection />
         <DirectoryPreviewSection />
-        <TestimonialsSection />
+        <TestimonialsSection
+          hidden={true}
+          preserveData={true}
+          futureImplementation={true}
+        />
         <MembershipSection />
-        <AboutSection />
       </main>
       <ShowcaseFooter />
     </>

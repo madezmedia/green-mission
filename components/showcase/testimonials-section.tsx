@@ -31,7 +31,22 @@ const testimonials = [
   },
 ]
 
-export default function TestimonialsSection() {
+interface TestimonialsSectionProps {
+  hidden?: boolean
+  preserveData?: boolean
+  futureImplementation?: boolean
+}
+
+export default function TestimonialsSection({
+  hidden = false,
+  preserveData = false,
+  futureImplementation = false
+}: TestimonialsSectionProps) {
+  // Hide section but preserve data for future implementation
+  if (hidden && preserveData && futureImplementation) {
+    return null
+  }
+
   return (
     <section className="py-16 md:py-24 bg-muted/20">
       <div className="container mx-auto px-4 md:px-6">

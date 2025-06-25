@@ -5,20 +5,23 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import ShowcaseNavigation from "@/components/showcase/showcase-navigation"
 import ShowcaseFooter from "@/components/showcase/showcase-footer"
-import { 
-  MapPin, 
-  Globe, 
-  Phone, 
-  Mail, 
-  Star, 
-  Shield, 
-  Award, 
+import MemberTag from "@/components/directory/member-tag"
+import MemberSince from "@/components/directory/member-since"
+import IndustryTag from "@/components/directory/industry-tag"
+import AlignmentToGreenMission from "@/components/directory/alignment-to-green-mission"
+import {
+  MapPin,
+  Globe,
+  Phone,
+  Mail,
+  Star,
+  Shield,
+  Award,
   Calendar,
   ExternalLink,
   ArrowLeft,
@@ -62,6 +65,7 @@ interface MemberProfile {
   "Operating Hours"?: string
   "Team Members"?: TeamMember[]
   "Gallery Images"?: { url: string; caption?: string }[]
+  "Green Mission Alignment"?: string
 }
 
 export default async function MemberProfilePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -300,9 +304,11 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h1 className="text-2xl font-bold">{member["Business Name"]}</h1>
-                        <Badge className={tierColor}>
-                          {member["Membership Tier"]?.[0] || "Basic"}
-                        </Badge>
+                        <MemberTag
+                          type={member["Featured Member"] ? "Featured Member" : "Member"}
+                          color={member["Featured Member"] ? "green-accent" : "green-base"}
+                          icon={member["Featured Member"] ? "star" : "check"}
+                        />
                         <Shield className="h-5 w-5 text-primary" />
                       </div>
                       
@@ -318,16 +324,18 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                           </div>
                         )}
                         {member["Member Since"] && (
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            Member since {new Date(member["Member Since"]).getFullYear()}
-                          </div>
+                          <MemberSince
+                            date={member["Member Since"]}
+                            format="Month YYYY"
+                            className="text-sm"
+                          />
                         )}
                         {member["Industry Category"] && (
-                          <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            {member["Industry Category"][0]}
-                          </div>
+                          <IndustryTag
+                            category={member["Industry Category"][0]}
+                            position="after-member-since"
+                            className="text-sm"
+                          />
                         )}
                       </div>
                     </div>
@@ -347,23 +355,10 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                 </CardContent>
               </Card>
 
-              {/* Services */}
-              {member["Services Offered"] && member["Services Offered"].length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Services & Specialties</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {member["Services Offered"].map((service, index) => (
-                        <Badge key={index} variant="secondary">
-                          {service}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              {/* Alignment to Green Mission */}
+              <AlignmentToGreenMission
+                content={member["Green Mission Alignment"] || ""}
+              />
 
               {/* Certifications */}
               {member.Certifications && member.Certifications.length > 0 && (
@@ -384,36 +379,6 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                 </Card>
               )}
 
-              {/* Team Members */}
-              {member["Team Members"] && member["Team Members"].length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Meet Our Team</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {member["Team Members"].map((teamMember, index) => (
-                        <div key={index} className="text-center">
-                          <Avatar className="h-20 w-20 mx-auto mb-3">
-                            <AvatarImage
-                              src={teamMember.image}
-                              alt={teamMember.name}
-                            />
-                            <AvatarFallback className="bg-gradient-primary text-white">
-                              {teamMember.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          <h4 className="font-semibold">{teamMember.name}</h4>
-                          <p className="text-sm text-primary font-medium">{teamMember.role}</p>
-                          {teamMember.bio && (
-                            <p className="text-xs text-muted-foreground mt-2">{teamMember.bio}</p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
 
               {/* Image Gallery */}
               {member["Gallery Images"] && member["Gallery Images"].length > 0 && (
@@ -515,41 +480,21 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                 </Card>
               )}
 
-              {/* Sustainability Score */}
-              {member["Sustainability Score"] && (
+
+              {/* Connect Button - Hidden but preserved for future implementation */}
+              {false && (
                 <Card>
-                  <CardHeader>
-                    <CardTitle>Sustainability Score</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span>Environmental Impact</span>
-                        <span className="font-semibold text-primary">
-                          {member["Sustainability Score"]}%
-                        </span>
-                      </div>
-                      <Progress value={member["Sustainability Score"]} className="h-2" />
-                      <p className="text-xs text-muted-foreground">
-                        Based on certifications, practices, and community impact
-                      </p>
-                    </div>
+                  <CardContent className="p-6">
+                    <Button className="w-full" size="lg">
+                      <Mail className="mr-2 h-4 w-4" />
+                      Connect with {member["Business Name"]}
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2 text-center">
+                      Send a message to explore partnership opportunities
+                    </p>
                   </CardContent>
                 </Card>
               )}
-
-              {/* Connect Button */}
-              <Card>
-                <CardContent className="p-6">
-                  <Button className="w-full" size="lg">
-                    <Mail className="mr-2 h-4 w-4" />
-                    Connect with {member["Business Name"]}
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2 text-center">
-                    Send a message to explore partnership opportunities
-                  </p>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </div>

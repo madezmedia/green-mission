@@ -3,11 +3,13 @@ import Link from "next/link"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star, MapPin, Shield, ExternalLink, Heart, Eye } from "lucide-react"
 import type { Member } from "@/types"
 import { cn } from "@/lib/utils"
+import MemberTag from "./member-tag"
+import MemberSince from "./member-since"
+import IndustryTag from "./industry-tag"
 
 interface MemberCardProps {
   member: Member
@@ -34,7 +36,11 @@ export default function MemberCard({ member, layout = "grid" }: MemberCardProps)
           <div className="ml-4 flex-grow">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-semibold">{member.name}</h3>
-              <Badge className={cn(tierColors[member.tier], "shadow-sm")}>{member.tier}</Badge>
+              <MemberTag
+                type={member.featured ? "Featured Member" : "Member"}
+                color={member.featured ? "green-accent" : "green-base"}
+                icon={member.featured ? "star" : "check"}
+              />
               {member.verified && <Shield className="h-4 w-4 text-primary" />}
             </div>
             <p className="text-sm text-muted-foreground">{member.tagline}</p>
@@ -42,9 +48,14 @@ export default function MemberCard({ member, layout = "grid" }: MemberCardProps)
               <span className="flex items-center gap-1">
                 <MapPin size={12} /> {member.location}
               </span>
-              <span className="flex items-center gap-1">
-                <Star size={12} className="text-accent fill-accent" /> {member.rating} ({member.reviews} reviews)
-              </span>
+              <MemberSince
+                date={member.memberSince}
+                format="Month YYYY"
+              />
+              <IndustryTag
+                category={member.industryCategory}
+                position="after-member-since"
+              />
             </div>
             <div className="mt-2 flex flex-wrap gap-1">
               {member.businessTags?.slice(0, 2).map((tag) => (
@@ -108,26 +119,27 @@ export default function MemberCard({ member, layout = "grid" }: MemberCardProps)
       <CardContent className="flex-grow pt-6">
         <div className="flex items-center gap-2">
           <h3 className="text-xl font-bold">{member.name}</h3>
-          <Badge className={cn(tierColors[member.tier], "shadow-sm")}>{member.tier}</Badge>
+          <MemberTag
+            type={member.featured ? "Featured Member" : "Member"}
+            color={member.featured ? "green-accent" : "green-base"}
+            icon={member.featured ? "star" : "check"}
+          />
         </div>
         <p className="mt-1 text-sm text-muted-foreground">{member.tagline}</p>
         <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <MapPin size={12} /> {member.location}
           </span>
-          <span className="flex items-center gap-1">
-            <Star size={12} className="text-accent fill-accent" /> {member.rating} ({member.reviews} reviews)
-          </span>
+          <MemberSince
+            date={member.memberSince}
+            format="Month YYYY"
+          />
+          <IndustryTag
+            category={member.industryCategory}
+            position="after-member-since"
+          />
         </div>
         <p className="mt-4 text-sm line-clamp-3">{member.description}</p>
-
-        <div className="mt-4">
-          <div className="mb-2 flex justify-between text-xs text-muted-foreground">
-            <span>Sustainability Score</span>
-            <span className="font-semibold text-primary">{member.sustainabilityScore}%</span>
-          </div>
-          <Progress value={member.sustainabilityScore} className="h-2 bg-muted" />
-        </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
           {member.businessTags?.map((tag) => (

@@ -25,6 +25,7 @@ interface ApiResponse {
   count: number
   members: any[]
   cached?: boolean
+  error?: string
 }
 
 interface CategoriesResponse {
@@ -89,8 +90,13 @@ export default function DirectoryPage() {
             sustainabilityScore: member["Sustainability Score"] || member.sustainabilityScore || 75,
             certifications: member.Certifications || member.certifications || [],
             specialties: member["Services Offered"] || member.specialties || [],
+            businessTags: member["Business Tags"] || member.businessTags || [],
             featured: member["Featured Member"] || member.featured || false,
+            spotlight: member.spotlight || false,
             verified: member.verified || true,
+            memberSince: member["Member Since"] || member.memberSince || "2023-01-01",
+            industryCategory: member["Industry Category"]?.[0] || member.category || "General",
+            greenMissionAlignment: member["Green Mission Alignment"] || member.greenMissionAlignment,
           }))
           console.log("Transformed members:", transformedMembers.length)
           setMembers(transformedMembers)
