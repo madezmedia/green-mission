@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { greenMissionClient } from "@/lib/airtable/green-mission-client"
 import { generateBusinessIdentifiers } from "@/lib/business-id-generator"
+import { getDashboardConfig, getVisibleFormFields, ESSENTIAL_FIELDS } from "@/lib/config"
 
 // Helper function to map form data to Airtable format
 function mapToAirtableFormat(formData: any, userId: string) {
@@ -26,6 +27,16 @@ function mapToAirtableFormat(formData: any, userId: string) {
   
   if (formData.certifications) {
     mappedData["Certifications"] = formData.certifications
+  }
+
+  // Handle logo upload
+  if (formData.logo) {
+    mappedData["Logo"] = [{ url: formData.logo }]
+  }
+
+  // Handle business images
+  if (formData.businessImages && formData.businessImages.length > 0) {
+    mappedData["Business Images"] = formData.businessImages.map((url: string) => ({ url }))
   }
 
   // Handle Business Tags - only use predefined options: "Sustainable", "Local", "B-Corp", "Women-Owned"
@@ -68,8 +79,64 @@ function mapFromAirtableFormat(record: any) {
     membershipTier: "Basic", // Default since this field doesn't exist yet
     directoryVisibility: true, // Default to true
     status: fields["Membership Status"] || "Pending",
-    lastSynced: fields["Last Updated"] || null
+    lastSynced: fields["Last Updated"] || null,
+    logo: fields["Logo"] && fields["Logo"][0] ? fields["Logo"][0].url : "",
+    businessImages: fields["Business Images"] ? fields["Business Images"].map((img: any) => img.url) : []
   }
+}
+
+/**
+ * Filter API response based on simplified mode configuration
+ *
+ * In simplified mode, only essential fields are returned to match the UI.
+ * In advanced mode, all fields are returned for full functionality.
+ *
+ * @param {any} listing - The complete business listing object
+ * @returns {any} Filtered listing object based on current configuration
+ */
+function filterResponseForSimplifiedMode(listing: any) {
+  const config = getDashboardConfig()
+  
+  // If not in simplified mode, return complete response
+  if (!config.isSimplified) {
+    return listing
+  }
+  
+  // Essential fields for simplified mode (matching UI requirements)
+  const essentialFields = [
+    'id',
+    'businessName',
+    'description',
+    'industry',
+    'website',
+    'email',
+    'phone',
+    'city',
+    'country',
+    'status',
+    'logo',           // Include logo for image management
+    'businessImages'  // Include business images for gallery management
+  ]
+  
+  // Create filtered object with only essential fields
+  const filteredListing: any = {}
+  
+  essentialFields.forEach(field => {
+    if (listing.hasOwnProperty(field)) {
+      filteredListing[field] = listing[field]
+    }
+  })
+  
+  // PHASE 2: Advanced fields that are filtered out in simplified mode
+  // These fields are preserved in the data but hidden from API response:
+  // - sustainabilityPractices: Advanced sustainability reporting
+  // - certifications: Detailed certification information
+  // - membershipTier: Membership level management
+  // - directoryVisibility: Advanced visibility controls
+  // - lastSynced: Airtable sync status information
+  // - organizationId: Organization management features
+  
+  return filteredListing
 }
 
 // GET - Fetch user's business listing
@@ -101,10 +168,13 @@ export async function GET() {
 
     console.log("Mapping record to listing format...")
     const listing = mapFromAirtableFormat(records[0])
+    
+    // Apply response filtering based on simplified mode configuration
+    const filteredListing = filterResponseForSimplifiedMode(listing)
 
     return NextResponse.json({
       success: true,
-      listing
+      listing: filteredListing
     })
   } catch (error) {
     console.error("Error fetching business listing:", error)
@@ -147,10 +217,13 @@ export async function POST(request: NextRequest) {
       }
       const updatedRecord = await greenMissionClient.updateMember(recordId, airtableData)
       const listing = mapFromAirtableFormat(updatedRecord)
+      
+      // Apply response filtering based on simplified mode configuration
+      const filteredListing = filterResponseForSimplifiedMode(listing)
 
       return NextResponse.json({
         success: true,
-        listing,
+        listing: filteredListing,
         message: "Business listing updated successfully"
       })
     } else {
@@ -170,10 +243,13 @@ export async function POST(request: NextRequest) {
         
         const createdRecord = await greenMissionClient.createMember(newBusinessData)
         const listing = mapFromAirtableFormat(createdRecord)
+        
+        // Apply response filtering based on simplified mode configuration
+        const filteredListing = filterResponseForSimplifiedMode(listing)
 
         return NextResponse.json({
           success: true,
-          listing,
+          listing: filteredListing,
           message: "Business listing created successfully"
         })
       } catch (idGenerationError) {
@@ -182,10 +258,13 @@ export async function POST(request: NextRequest) {
         // Fallback without auto-generated IDs
         const createdRecord = await greenMissionClient.createMember(airtableData)
         const listing = mapFromAirtableFormat(createdRecord)
+        
+        // Apply response filtering based on simplified mode configuration
+        const filteredListing = filterResponseForSimplifiedMode(listing)
 
         return NextResponse.json({
           success: true,
-          listing,
+          listing: filteredListing,
           message: "Business listing created successfully (manual ID generation required)"
         })
       }
@@ -237,10 +316,13 @@ export async function PUT(request: NextRequest) {
     const updatedRecord = await greenMissionClient.updateMember(recordId, airtableData)
 
     const listing = mapFromAirtableFormat(updatedRecord)
+    
+    // Apply response filtering based on simplified mode configuration
+    const filteredListing = filterResponseForSimplifiedMode(listing)
 
     return NextResponse.json({
       success: true,
-      listing,
+      listing: filteredListing,
       message: "Business listing updated successfully"
     })
   } catch (error) {

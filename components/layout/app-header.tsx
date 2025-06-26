@@ -15,10 +15,13 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { UserButton, useUser } from "@clerk/nextjs"
 import AppSidebar from "./app-sidebar"
 import { useState } from "react"
+import { usePrimaryLogo } from "@/lib/hooks/use-cms-content"
+import Image from "next/image"
 
 export default function AppHeader() {
   const { user } = useUser()
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  const { logoUrl, altText, loading: logoLoading } = usePrimaryLogo()
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card/95 px-6 backdrop-blur-md">
@@ -35,9 +38,23 @@ export default function AppHeader() {
           </SheetContent>
         </Sheet>
         <div className="hidden items-center gap-3 lg:flex">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary">
-            <Leaf className="h-5 w-5 text-white" />
-          </div>
+          {logoUrl && !logoLoading ? (
+            <div className="relative h-8 w-auto">
+              <Image
+                src={logoUrl}
+                alt={altText || "Green Mission Logo"}
+                width={120}
+                height={32}
+                className="h-8 w-auto object-contain"
+                sizes="32px"
+                priority
+              />
+            </div>
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary">
+              <Leaf className="h-5 w-5 text-white" />
+            </div>
+          )}
           <h1 className="text-xl font-bold text-foreground">Green Mission</h1>
         </div>
       </div>

@@ -14,6 +14,7 @@ import MemberTag from "@/components/directory/member-tag"
 import MemberSince from "@/components/directory/member-since"
 import IndustryTag from "@/components/directory/industry-tag"
 import AlignmentToGreenMission from "@/components/directory/alignment-to-green-mission"
+import BusinessImageGallery from "@/components/directory/business-image-gallery"
 import {
   MapPin,
   Globe,
@@ -111,17 +112,8 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
           ]
         }
         
-        // Add sample gallery if not present in Airtable
-        if (!memberWithExtras["Gallery Images"]) {
-          memberWithExtras["Gallery Images"] = [
-            { url: "/placeholder-gallery-1.jpg", caption: "Our state-of-the-art facility" },
-            { url: "/placeholder-gallery-2.jpg", caption: "Team collaboration in action" },
-            { url: "/placeholder-gallery-3.jpg", caption: "Sustainable production process" },
-            { url: "/placeholder-gallery-4.jpg", caption: "Community engagement event" },
-            { url: "/placeholder-gallery-5.jpg", caption: "Award ceremony recognition" },
-            { url: "/placeholder-gallery-6.jpg", caption: "Innovation lab workspace" }
-          ]
-        }
+        // Business images are now handled by the real Airtable data
+        // No need for placeholder gallery images
         
         member = memberWithExtras
       }
@@ -166,15 +158,8 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
           }
         ]
 
-        // Generate sample gallery images
-        const galleryImages = [
-          { url: "/placeholder-gallery-1.jpg", caption: "Our state-of-the-art facility" },
-          { url: "/placeholder-gallery-2.jpg", caption: "Team collaboration in action" },
-          { url: "/placeholder-gallery-3.jpg", caption: "Sustainable production process" },
-          { url: "/placeholder-gallery-4.jpg", caption: "Community engagement event" },
-          { url: "/placeholder-gallery-5.jpg", caption: "Award ceremony recognition" },
-          { url: "/placeholder-gallery-6.jpg", caption: "Innovation lab workspace" }
-        ]
+        // Sample data no longer includes placeholder gallery images
+        // Real business images come from Airtable Business Images field
 
         // Transform sample member to expected API format
         member = {
@@ -198,7 +183,6 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
           Certifications: sampleMember.certifications,
           Website: `https://${sampleMember.name.toLowerCase().replace(/\s+/g, '')}.com`,
           "Team Members": teamMembers,
-          "Gallery Images": galleryImages,
         } as MemberProfile
       }
     }
@@ -354,6 +338,21 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
                   </p>
                 </CardContent>
               </Card>
+
+              {/* Business Images Gallery */}
+              {member["Business Images"] && member["Business Images"].length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Business Images</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <BusinessImageGallery
+                      images={member["Business Images"].map(img => img.url)}
+                      businessName={member["Business Name"]}
+                    />
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Alignment to Green Mission */}
               <AlignmentToGreenMission

@@ -10,6 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Save, Loader2 } from "lucide-react"
+import { getDashboardConfig, ESSENTIAL_FIELDS } from "@/lib/config"
+import ImageUpload from "@/components/ui/image-upload"
+import ImageGallery from "@/components/ui/image-gallery"
 
 interface BusinessListing {
   id?: string
@@ -29,6 +32,8 @@ interface BusinessListing {
   directoryVisibility: boolean
   status: "Active" | "Pending" | "Inactive"
   lastSynced?: string
+  logo?: string
+  businessImages?: string[]
 }
 
 interface BusinessListingFormProps {
@@ -68,11 +73,11 @@ const countries = [
   "Other"
 ]
 
-export default function BusinessListingForm({ 
-  listing, 
-  onSave, 
-  onCancel, 
-  onChange 
+export default function BusinessListingForm({
+  listing,
+  onSave,
+  onCancel,
+  onChange
 }: BusinessListingFormProps) {
   const [formData, setFormData] = useState<BusinessListing>({
     businessName: "",
@@ -90,10 +95,15 @@ export default function BusinessListingForm({
     membershipTier: "Basic",
     directoryVisibility: true,
     status: "Pending",
+    logo: "",
+    businessImages: [],
     ...listing
   })
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  
+  // Get dashboard configuration for feature flags
+  const config = getDashboardConfig()
 
   useEffect(() => {
     if (listing) {
@@ -101,7 +111,7 @@ export default function BusinessListingForm({
     }
   }, [listing])
 
-  const handleInputChange = (field: keyof BusinessListing, value: string | boolean) => {
+  const handleInputChange = (field: keyof BusinessListing, value: string | boolean | string[]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -179,11 +189,24 @@ export default function BusinessListingForm({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="basic" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={`grid w-full ${
+            config.features.advancedImageFeatures
+              ? (config.featureSettings.tabs.showSustainability && config.featureSettings.tabs.showSettings ? 'grid-cols-5' : 'grid-cols-3')
+              : (config.featureSettings.tabs.showSustainability && config.featureSettings.tabs.showSettings ? 'grid-cols-4' : 'grid-cols-2')
+          }`}>
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="contact">Contact</TabsTrigger>
-            <TabsTrigger value="sustainability">Sustainability</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+            {/* Images tab - shown when advanced image features are enabled */}
+            {config.features.advancedImageFeatures && (
+              <TabsTrigger value="images">Images</TabsTrigger>
+            )}
+            {/* PHASE 2: Advanced tabs - hidden in simplified mode */}
+            {config.featureSettings.tabs.showSustainability && (
+              <TabsTrigger value="sustainability">Sustainability</TabsTrigger>
+            )}
+            {config.featureSettings.tabs.showSettings && (
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="basic" className="space-y-4">
@@ -254,6 +277,24 @@ export default function BusinessListingForm({
                 <p className="text-sm text-red-500 mt-1">{errors.website}</p>
               )}
             </div>
+
+            {/* Logo Upload - Always show in simplified mode for better visibility */}
+            {config.images.enabled && (
+              <div className="space-y-2">
+                <Label htmlFor="logo">Business Logo</Label>
+                <p className="text-sm text-muted-foreground">
+                  Upload your business logo to appear in the directory
+                </p>
+                <ImageUpload
+                  value={formData.logo}
+                  onChange={(url) => handleInputChange("logo", url || "")}
+                  maxSize={config.images.maxSize}
+                  acceptedTypes={config.images.acceptedTypes}
+                  placeholder="Upload your business logo"
+                  disabled={saving}
+                />
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="contact" className="space-y-4">
@@ -285,17 +326,20 @@ export default function BusinessListingForm({
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="address">Street Address</Label>
-              <Input
-                id="address"
-                value={formData.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
-                placeholder="123 Green Street"
-              />
-            </div>
+            {/* PHASE 2: Advanced contact fields - hidden in simplified mode */}
+            {!config.isSimplified && (
+              <div>
+                <Label htmlFor="address">Street Address</Label>
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => handleInputChange("address", e.target.value)}
+                  placeholder="123 Green Street"
+                />
+              </div>
+            )}
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className={`grid gap-4 ${config.isSimplified ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
               <div>
                 <Label htmlFor="city">City *</Label>
                 <Input
@@ -310,20 +354,23 @@ export default function BusinessListingForm({
                 )}
               </div>
               
-              <div>
-                <Label htmlFor="state">State/Province</Label>
-                <Input
-                  id="state"
-                  value={formData.state}
-                  onChange={(e) => handleInputChange("state", e.target.value)}
-                  placeholder="California"
-                />
-              </div>
+              {/* PHASE 2: State field - hidden in simplified mode */}
+              {!config.isSimplified && (
+                <div>
+                  <Label htmlFor="state">State/Province</Label>
+                  <Input
+                    id="state"
+                    value={formData.state}
+                    onChange={(e) => handleInputChange("state", e.target.value)}
+                    placeholder="California"
+                  />
+                </div>
+              )}
               
               <div>
                 <Label htmlFor="country">Country *</Label>
-                <Select 
-                  value={formData.country} 
+                <Select
+                  value={formData.country}
                   onValueChange={(value) => handleInputChange("country", value)}
                 >
                   <SelectTrigger className={errors.country ? "border-red-500" : ""}>
@@ -344,71 +391,129 @@ export default function BusinessListingForm({
             </div>
           </TabsContent>
 
-          <TabsContent value="sustainability" className="space-y-4">
-            <div>
-              <Label htmlFor="sustainabilityPractices">Sustainability Practices</Label>
-              <Textarea
-                id="sustainabilityPractices"
-                value={formData.sustainabilityPractices}
-                onChange={(e) => handleInputChange("sustainabilityPractices", e.target.value)}
-                placeholder="Describe your environmental initiatives, sustainable practices, and green policies..."
-                rows={5}
-              />
-              <p className="text-sm text-muted-foreground mt-1">
-                Share your commitment to sustainability and environmental responsibility
-              </p>
-            </div>
+          {/* Images Tab - shown when advanced image features are enabled */}
+          {config.features.advancedImageFeatures && (
+            <TabsContent value="images" className="space-y-6">
+              {/* Logo Section */}
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-base font-semibold">Business Logo</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Your logo will appear in directory listings and business profiles
+                  </p>
+                </div>
+                <ImageUpload
+                  value={formData.logo}
+                  onChange={(url) => handleInputChange("logo", url || "")}
+                  maxSize={config.images.maxSize}
+                  acceptedTypes={config.images.acceptedTypes}
+                  placeholder="Upload your business logo"
+                  disabled={saving}
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="certifications">Certifications & Awards</Label>
-              <Textarea
-                id="certifications"
-                value={formData.certifications}
-                onChange={(e) => handleInputChange("certifications", e.target.value)}
-                placeholder="List any environmental certifications, awards, or recognitions..."
-                rows={3}
-              />
-              <p className="text-sm text-muted-foreground mt-1">
-                Include B-Corp certification, LEED, Energy Star, or other sustainability credentials
-              </p>
-            </div>
-          </TabsContent>
+              {/* Divider */}
+              <div className="border-t pt-6">
+                <div>
+                  <Label className="text-base font-semibold">Business Images</Label>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Add photos of your business, products, or services to showcase your work.
+                    These images will appear in your business profile and help customers understand your offerings.
+                  </p>
+                </div>
+                <ImageGallery
+                  value={formData.businessImages || []}
+                  onChange={(urls) => handleInputChange("businessImages", urls)}
+                  maxImages={config.images.maxImages - 1} // Reserve 1 slot for logo
+                  maxSize={config.images.maxSize}
+                  disabled={saving}
+                />
+                
+                {/* Image Management Tips */}
+                <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                  <h4 className="text-sm font-medium mb-2">Image Tips:</h4>
+                  <ul className="text-xs text-muted-foreground space-y-1">
+                    <li>• Use high-quality images that represent your business well</li>
+                    <li>• The first image will be used as your primary business photo</li>
+                    <li>• Recommended size: 1200x800 pixels or larger</li>
+                    <li>• Supported formats: JPEG, PNG, WebP</li>
+                  </ul>
+                </div>
+              </div>
+            </TabsContent>
+          )}
 
-          <TabsContent value="settings" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="directoryVisibility">Directory Visibility</Label>
-                <p className="text-sm text-muted-foreground">
-                  Make your business discoverable in the Green Mission directory
+          {/* PHASE 2: Sustainability Tab - hidden in simplified mode */}
+          {config.featureSettings.tabs.showSustainability && (
+            <TabsContent value="sustainability" className="space-y-4">
+              <div>
+                <Label htmlFor="sustainabilityPractices">Sustainability Practices</Label>
+                <Textarea
+                  id="sustainabilityPractices"
+                  value={formData.sustainabilityPractices}
+                  onChange={(e) => handleInputChange("sustainabilityPractices", e.target.value)}
+                  placeholder="Describe your environmental initiatives, sustainable practices, and green policies..."
+                  rows={5}
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Share your commitment to sustainability and environmental responsibility
                 </p>
               </div>
-              <Switch
-                id="directoryVisibility"
-                checked={formData.directoryVisibility}
-                onCheckedChange={(checked) => handleInputChange("directoryVisibility", checked)}
-              />
-            </div>
 
-            <div>
-              <Label>Membership Tier</Label>
-              <div className="text-sm text-muted-foreground mt-1">
-                Current tier: <span className="font-medium">{formData.membershipTier}</span>
+              <div>
+                <Label htmlFor="certifications">Certifications & Awards</Label>
+                <Textarea
+                  id="certifications"
+                  value={formData.certifications}
+                  onChange={(e) => handleInputChange("certifications", e.target.value)}
+                  placeholder="List any environmental certifications, awards, or recognitions..."
+                  rows={3}
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Include B-Corp certification, LEED, Energy Star, or other sustainability credentials
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                To change your membership tier, visit the pricing page
-              </p>
-            </div>
+            </TabsContent>
+          )}
 
-            <div>
-              <Label>Listing Status</Label>
-              <div className="text-sm text-muted-foreground mt-1">
-                Status: <span className="font-medium">{formData.status}</span>
+          {/* PHASE 2: Settings Tab - hidden in simplified mode */}
+          {config.featureSettings.tabs.showSettings && (
+            <TabsContent value="settings" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="directoryVisibility">Directory Visibility</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Make your business discoverable in the Green Mission directory
+                  </p>
+                </div>
+                <Switch
+                  id="directoryVisibility"
+                  checked={formData.directoryVisibility}
+                  onCheckedChange={(checked) => handleInputChange("directoryVisibility", checked)}
+                />
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                New listings are reviewed before going live
-              </p>
-            </div>
-          </TabsContent>
+
+              <div>
+                <Label>Membership Tier</Label>
+                <div className="text-sm text-muted-foreground mt-1">
+                  Current tier: <span className="font-medium">{formData.membershipTier}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  To change your membership tier, visit the pricing page
+                </p>
+              </div>
+
+              <div>
+                <Label>Listing Status</Label>
+                <div className="text-sm text-muted-foreground mt-1">
+                  Status: <span className="font-medium">{formData.status}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  New listings are reviewed before going live
+                </p>
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
 
         <div className="flex gap-4 mt-8 pt-6 border-t">

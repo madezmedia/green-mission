@@ -32,15 +32,17 @@ function mapFromAirtableFormat(record: any) {
     membershipTier: "Basic", // Default since this field doesn't exist yet
     directoryVisibility: true, // Default to true
     status: fields["Membership Status"] || "Pending",
-    lastSynced: fields["Last Updated"] || null
+    lastSynced: fields["Last Updated"] || null,
+    logo: fields["Logo"] && fields["Logo"][0] ? fields["Logo"][0].url : "",
+    businessImages: fields["Business Images"] ? fields["Business Images"].map((img: any) => img.url) : []
   }
 }
 
-async function getBusinessListing(userId: string) {
+async function getBusinessListings(userId: string) {
   try {
-    console.log("Server: Fetching business listing for user:", userId)
+    console.log("Server: Fetching business listings for user:", userId)
     
-    // Search for existing listing by User ID
+    // Search for existing listings by User ID
     const records = await greenMissionClient.getMembers({
       filterByFormula: `{User ID} = "${userId}"`
     })
@@ -48,19 +50,21 @@ async function getBusinessListing(userId: string) {
     console.log("Server: Records found:", records.length)
     
     if (records.length === 0) {
-      return null
+      return []
     }
     
-    const mappedListing = mapFromAirtableFormat(records[0])
-    if (!mappedListing) {
-      console.error("Failed to map record to listing format")
-      return null
-    }
+    // Map all records to listings
+    const mappedListings = records.map((record, index) => {
+      console.log(`Server: Record ${index + 1} fields:`, JSON.stringify(record.fields, null, 2))
+      const mappedListing = mapFromAirtableFormat(record)
+      console.log(`Server: Mapped listing ${index + 1}:`, JSON.stringify(mappedListing, null, 2))
+      return mappedListing
+    }).filter(listing => listing !== null)
     
-    return mappedListing
+    return mappedListings
   } catch (error) {
-    console.error("Server: Error fetching business listing:", error)
-    return null
+    console.error("Server: Error fetching business listings:", error)
+    return []
   }
 }
 
@@ -68,10 +72,10 @@ export default async function BusinessListingServerWrapper() {
   const { userId } = await auth()
   
   if (!userId) {
-    return <div>Please sign in to access your business listing.</div>
+    return <div>Please sign in to access your business listings.</div>
   }
   
-  const initialListing = await getBusinessListing(userId)
+  const initialListings = await getBusinessListings(userId)
   
-  return <BusinessListingDashboard initialListing={initialListing} />
+  return <BusinessListingDashboard initialListings={initialListings} />
 }
