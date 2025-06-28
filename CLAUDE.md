@@ -53,19 +53,25 @@ pnpm generate-business-ids:check  # Check/validate business ID generation
 - **2-Way Sync**: Dashboard supports full CRUD operations with real-time sync to/from Airtable
 
 ### Component Architecture
-- **UI Components**: shadcn/ui components in `components/ui/`
-- **Layout Components**: Header, sidebar, navigation in `components/layout/`
+- **UI Components**: shadcn/ui components in `components/ui/` with custom image management components
+- **Layout Components**: Header, sidebar, navigation in `components/layout/` with simplified/advanced modes
 - **Feature Components**: Organized by domain (dashboard, directory, showcase)
 - **Theme Provider**: Custom theme switching with Green Mission branding
+- **Configuration System**: Feature flags control dashboard complexity and component visibility
 
 ### Key Files
 - `lib/airtable/green-mission-client.ts`: All Airtable data access functions with multi-base support
+- `lib/config.ts`: Dashboard configuration system with feature flags and simplified mode
+- `lib/feature-flags.ts`: Feature flag management for dashboard complexity control
 - `lib/data.ts`: Static/mock data and data transformations
 - `lib/organization-management.ts`: Organization and business listing management
 - `lib/clerk-airtable-sync.ts`: Clerk-Airtable user synchronization
 - `lib/business-id-generator.ts`: Unique business ID generation utility
 - `types/index.ts`: TypeScript interfaces for Member and Category types
 - `components/layout/theme-provider.tsx`: Theme context provider
+- `components/layout/simple-header.tsx`: Simplified header for basic dashboard mode
+- `components/ui/image-upload.tsx`: Business image upload component
+- `components/ui/image-gallery.tsx`: Responsive image gallery component
 - `app/globals.css`: Custom CSS variables for Green Mission theming
 - `middleware.ts`: Clerk authentication middleware
 - `next.config.mjs`: Build configuration (ignores TypeScript/ESLint errors, unoptimized images)
@@ -132,6 +138,9 @@ Copy `.env.example` to `.env.local` and configure:
 - ✅ Business Tags integration with predefined options: "Sustainable", "Local", "B-Corp", "Women-Owned"
 - ✅ Unique business ID generation system
 - ✅ Organization-based business management
+- ✅ Business image upload and management system
+- ✅ Logo and gallery image support with Airtable integration
+- ✅ Simplified and advanced dashboard modes with feature flags
 
 ### Directory & Member Display
 - ✅ Dynamic member directory with live Airtable data
@@ -142,6 +151,8 @@ Copy `.env.example` to `.env.local` and configure:
 - ✅ Real-time search across multiple fields
 - ✅ Dynamic category filtering with live member counts
 - ✅ Advanced filter panel with Featured/Showcase toggle
+- ✅ Business image galleries on member profile pages
+- ✅ Responsive image display with gallery components
 
 ### Organization Management
 - ✅ Clerk organization integration
@@ -176,6 +187,8 @@ Copy `.env.example` to `.env.local` and configure:
 - ✅ Proper handling of linked records and multiple choice fields
 - ✅ Business Tags field integration
 - ✅ Directory Spotlight field handling
+- ✅ Logo and Business Images fields with attachment support
+- ✅ Image URL extraction and display integration
 
 ## Future Development Roadmap
 
@@ -232,6 +245,52 @@ Copy `.env.example` to `.env.local` and configure:
 - [ ] Add proper error monitoring (Sentry)
 - [ ] Implement CI/CD pipeline
 
+## Dashboard Configuration System
+
+The application features a sophisticated configuration system that controls dashboard complexity and feature visibility:
+
+### Feature Flags (`lib/feature-flags.ts`)
+
+- **Simplified Mode**: Toggle between basic and advanced dashboard layouts
+- **Component Visibility**: Control which features are shown/hidden
+- **Form Field Management**: Essential vs. advanced form fields
+- **Layout Switching**: Sidebar navigation vs. simple header
+
+### Configuration Files
+
+- `lib/config.ts`: Main configuration system with `getDashboardConfig()`
+- `ESSENTIAL_FIELDS`: Core business listing fields always visible
+- **Simplified Mode**: Shows only essential fields and basic layout
+- **Advanced Mode**: Full feature set with sidebar navigation and advanced components
+
+### Layout Modes
+
+- **Simplified Layout**: Single-column with simple header (`SimpleHeader`)
+- **Advanced Layout**: Sidebar navigation with complex header (`AppHeader` + `AppSidebar`)
+- Automatic switching based on feature flag configuration
+
+## Image Management System
+
+### Upload Components
+
+- `components/ui/image-upload.tsx`: File upload with preview and validation
+- `components/ui/image-gallery.tsx`: Responsive grid gallery display
+- `components/dashboard/business-image-display.tsx`: Dashboard image management
+- `components/directory/business-image-gallery.tsx`: Directory page image display
+
+### Airtable Integration
+
+- **Logo Field**: Single attachment field for business logo
+- **Business Images Field**: Multiple attachment field for gallery images
+- Automatic URL extraction from Airtable attachment objects
+- Real-time sync between dashboard uploads and Airtable storage
+
+### API Support
+
+- `/api/upload/image`: Image upload endpoint (placeholder for future implementation)
+- Business listing API includes logo and businessImages fields
+- Response filtering based on simplified mode configuration
+
 ## Important Notes
 
 - Build ignores ESLint and TypeScript errors (`next.config.mjs`)
@@ -245,3 +304,6 @@ Copy `.env.example` to `.env.local` and configure:
 - **Industry Field**: Currently not stored due to Business Tags limitations - needs separate field in future version
 - Path mapping configured: Use `@/` for imports from project root
 - TypeScript strict mode enabled - type safety enforced throughout codebase
+- **Feature Flag System**: Controls dashboard complexity and component visibility
+- **Image Management**: Logo and gallery images stored as Airtable attachments
+- **Dual Layout System**: Simplified mode for basic users, advanced mode for power users
